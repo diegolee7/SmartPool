@@ -1,83 +1,87 @@
-/**
- * @file objectDetection.cpp
- * @author A. Huaman ( based in the classic facedetect.cpp in samples/c )
- * @brief A simplified version of facedetect.cpp, show how to load a cascade classifier and how to find objects (Face + eyes) in a video stream
- */
-#include "opencv2/objdetect/objdetect.hpp"
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
-
+#include "smartPool.h"
 #include <iostream>
 #include <stdio.h>
 
-using namespace std;
-using namespace cv;
+const string SmartPool::windowName = "Smart Pool";
+const string SmartPool::cannyThresholdTrackbarName = "Canny threshold";
+const string SmartPool::accumulatorThresholdTrackbarName = "Accumulator Threshold";
 
-/** Function Headers */
-void detectAndDisplay( Mat frame );
+void SmartPool::init() {
 
-/** Global variables */
-//-- Note, either copy these two files from opencv/data/haarscascades to your current folder, or change these locations
-
-string window_name = "Smart Pool";
-
-/**
- * @function main
- */
-int main( void )
-{
   VideoCapture capture;
   Mat frame;
 
   //Read the video stream
-  capture.open( 1 );
-  if( capture.isOpened() )
-  {
-    capture.set(CV_CAP_PROP_FRAME_WIDTH,1280);
-    capture.set(CV_CAP_PROP_FRAME_HEIGHT,720);
-    for(;;)
-    {
+  capture.open( cameraDevice );
+
+  if( capture.isOpened() ) {
+    capture.set(CV_CAP_PROP_FRAME_WIDTH, frameWidth);
+    capture.set(CV_CAP_PROP_FRAME_HEIGHT, frameHeight);
+    
+    for(;;) {
+
       capture >> frame;
 
       //Apply the classifier to the frame
-      if( !frame.empty() )
-       { detectAndDisplay( frame ); }
-      else
-       { printf(" --(!) No captured frame -- Break!"); break; }
+      if( !frame.empty() ){
+        detectAndDisplay( frame ); 
+      }
+      else {
+        printf(" --(!) No captured frame -- Break!"); break; 
+      }
 
       int c = waitKey(10);
-      if( (char)c == 'c' ) { break; }
-
+      if ( (char)c == 'c' ) {
+        break;
+      }
     }
   }
-  return 0;
+  return;
 }
 
 /**
  * @function detectAndDisplay
  */
-void detectAndDisplay( Mat frame )
-{
-  
-  Mat cimg;
-  Mat greyMat;
-  cvtColor(frame, greyMat, CV_BGR2GRAY);
-  medianBlur(greyMat, greyMat, 5);
-  cvtColor(greyMat, cimg, COLOR_GRAY2BGR);
+void SmartPool::detectAndDisplay( Mat frame ) { 
+  Mat frameGray;
+
+  // Convert it to gray
+  cvtColor(frame, frameGray, CV_BGR2GRAY);
+
+  // Reduce the noise so we avoid false circle detection
+  GaussianBlur( frameGray, frameGray, Size(9, 9), 2, 2 );  
 
   vector<Vec3f> circles;
-  HoughCircles(greyMat, circles, CV_HOUGH_GRADIENT, 1, 30,
+  HoughCircles(frameGray, circles, CV_HOUGH_GRADIENT, 1, 30,
                100, 10, 7, 10 // change the last two parameters
                               // (min_radius & max_radius) to detect larger circles
                );
 
-  for( size_t i = 0; i < circles.size(); i++ )
-  {
+  // Draw Circles on frame
+  for( size_t i = 0; i < circles.size(); i++ ) {
       Vec3i c = circles[i];
       circle( frame, Point(c[0], c[1]), c[2], Scalar(0,0,255), 3, CV_AA);
       circle( frame, Point(c[0], c[1]), 2, Scalar(0,255,0), 3, CV_AA);
   }
   
-   //-- Show what you got
-   imshow( window_name, frame );
+   //-- Show results
+   imshow( windowName, frame );
+}
+
+void SmartPool::createWindow(){
+
+    //declare and initialize both parameters that are subjects to change
+    int cannyThreshold = cannyThresholdInitialValue;
+    int accumulatorThreshold = accumulatorThresholdInitialValue;
+
+    // create the main window, and attach the trackbars
+    namedWindow( windowName, WINDOW_AUTOSIZE );
+    createTrackbar(cannyThresholdTrackbarName, windowName, &cannyThreshold,maxCannyThreshold);
+    createTrackbar(accumulatorThresholdTrackbarName, windowName, &accumulatorThreshold, maxAccumulatorThreshold);
+
+}
+
+int main(){
+  SmartPool smartPool;
+  smartPool.init();
 }
