@@ -5,11 +5,15 @@
 const string SmartPool::windowName = "Smart Pool";
 const string SmartPool::cannyThresholdTrackbarName = "Canny threshold";
 const string SmartPool::accumulatorThresholdTrackbarName = "Accumulator Threshold";
+const string SmartPool::minCircleSizeTrackbarName = "Minimum Circle Size";
+const string SmartPool::maxCircleSizeTrackbarName = "Maximum Circle Size";
 
 void SmartPool::init() {
 
   VideoCapture capture;
   Mat frame;
+
+  createWindow();
 
   //Read the video stream
   capture.open( cameraDevice );
@@ -19,6 +23,11 @@ void SmartPool::init() {
     capture.set(CV_CAP_PROP_FRAME_HEIGHT, frameHeight);
     
     for(;;) {
+
+      // those paramaters cannot be =0
+      // so we must check here
+      cannyThreshold = std::max(cannyThreshold, 1);
+      accumulatorThreshold = std::max(accumulatorThreshold, 1);
 
       capture >> frame;
 
@@ -52,10 +61,9 @@ void SmartPool::detectAndDisplay( Mat frame ) {
   GaussianBlur( frameGray, frameGray, Size(9, 9), 2, 2 );  
 
   vector<Vec3f> circles;
-  HoughCircles(frameGray, circles, CV_HOUGH_GRADIENT, 1, 30,
-               100, 10, 7, 10 // change the last two parameters
-                              // (min_radius & max_radius) to detect larger circles
-               );
+  HoughCircles( frameGray, circles, CV_HOUGH_GRADIENT, 1,
+                frameGray.rows/8, cannyThreshold, accumulatorThreshold, 
+                minCircleSize, maxCircleSize );
 
   // Draw Circles on frame
   for( size_t i = 0; i < circles.size(); i++ ) {
@@ -70,14 +78,20 @@ void SmartPool::detectAndDisplay( Mat frame ) {
 
 void SmartPool::createWindow(){
 
-    //declare and initialize both parameters that are subjects to change
-    int cannyThreshold = cannyThresholdInitialValue;
-    int accumulatorThreshold = accumulatorThresholdInitialValue;
+    //initialize both parameters that are subjects to change
+    cannyThreshold = cannyThresholdInitialValue;
+    accumulatorThreshold = accumulatorThresholdInitialValue;
+
+    // initizalize circleSizes
+    minCircleSize = minCircleSizeInitialValue;
+    maxCircleSize = maxCircleSizeInitialValue;
 
     // create the main window, and attach the trackbars
     namedWindow( windowName, WINDOW_AUTOSIZE );
     createTrackbar(cannyThresholdTrackbarName, windowName, &cannyThreshold,maxCannyThreshold);
     createTrackbar(accumulatorThresholdTrackbarName, windowName, &accumulatorThreshold, maxAccumulatorThreshold);
+    createTrackbar(minCircleSizeTrackbarName, windowName, &minCircleSize, maxMinCircleSize);
+    createTrackbar(maxCircleSizeTrackbarName, windowName, &maxCircleSize, maxMaxCircleSize);
 
 }
 
