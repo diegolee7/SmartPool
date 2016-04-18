@@ -8,8 +8,8 @@ using namespace cv;
 class SmartPool {
 
   private:
-    // Window Parameters
-    static const string windowName;
+    // Window Board Parameters
+    static const string windowBoardName;
     static const int frameWidth = 1280;
     static const int frameHeight = 720;
 
@@ -33,6 +33,10 @@ class SmartPool {
     static const int maxMinCircleSize = 100;
     static const int maxMaxCircleSize = 100;
 
+    // Window Parameters    
+    static const string windowProjectionName;
+
+
     // declare and initialize both parameters that are subjects to change
     int cannyThreshold;
     int accumulatorThreshold;
@@ -42,5 +46,6 @@ class SmartPool {
   public:
     void init();
     void detectAndDisplay(Mat frame);
-    void createWindow();
+    void createBoardWindow();
+    void createProjectionWindow();
 };
