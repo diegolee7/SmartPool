@@ -8,8 +8,9 @@ using namespace cv;
 class SmartPool {
 
   private:
-    // Window Board Parameters
+    // Window Parameters
     static const string windowBoardName;
+    static const string windowProjectionName;
     static const int frameWidth = 1280;
     static const int frameHeight = 720;
 
@@ -21,27 +22,28 @@ class SmartPool {
     static const string accumulatorThresholdTrackbarName;
     static const string minCircleSizeTrackbarName;
     static const string maxCircleSizeTrackbarName;
+    static const string distanceBetweenCircleCentersTrackbarName;
 
-    // initial and max values of the parameters of interests.
-    static const int cannyThresholdInitialValue = 60;
-    static const int accumulatorThresholdInitialValue = 20;
+    // initial values of the parameters of interests.
+    static const int cannyThresholdInitialValue = 36;
+    static const int accumulatorThresholdInitialValue = 15;
+    static const int minCircleSizeInitialValue = 26;
+    static const int maxCircleSizeInitialValue = 28;
+    static const int distanceBetweensCentersInitialValue = 45;
+
+    // max values of the parameters of interests.
     static const int maxAccumulatorThreshold = 200;
     static const int maxCannyThreshold = 255;
-
-    static const int minCircleSizeInitialValue = 26;
-    static const int maxCircleSizeInitialValue = 30;
     static const int maxMinCircleSize = 100;
     static const int maxMaxCircleSize = 100;
+    static const int maxDistanceBetweenCircleCenters = 100;
 
-    // Window Parameters    
-    static const string windowProjectionName;
-
-
-    // declare and initialize both parameters that are subjects to change
+    // declare and initialize parameters that are subjects to change
     int cannyThreshold;
     int accumulatorThreshold;
     int minCircleSize;
     int maxCircleSize;
+    int distanceBetweenCircleCenters;
 
   public:
     void init();
