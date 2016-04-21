@@ -17,6 +17,10 @@ class SmartPool {
     // camera device /dev/video1
     static const int cameraDevice = 1;
 
+    //video path
+    static const string videoPathAfterHomeDir;
+    static const string videoName;
+
     // trackbars names
     static const string cannyThresholdTrackbarName;
     static const string accumulatorThresholdTrackbarName;
@@ -26,9 +30,9 @@ class SmartPool {
 
     // initial values of the parameters of interests.
     static const int cannyThresholdInitialValue = 36;
-    static const int accumulatorThresholdInitialValue = 15;
-    static const int minCircleSizeInitialValue = 26;
-    static const int maxCircleSizeInitialValue = 28;
+    static const int accumulatorThresholdInitialValue = 17;
+    static const int minCircleSizeInitialValue = 27;
+    static const int maxCircleSizeInitialValue = 27;
     static const int distanceBetweensCentersInitialValue = 45;
 
     // max values of the parameters of interests.

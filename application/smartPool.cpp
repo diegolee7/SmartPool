@@ -1,29 +1,41 @@
 #include "smartPool.h"
 #include <iostream>
 #include <stdio.h>
+#include <string>
+#include <stdlib.h>
 
+//Window Names
 const string SmartPool::windowBoardName = "Smart Pool";
 const string SmartPool::windowProjectionName = "Projection";
+
+//TrackBar Names
 const string SmartPool::cannyThresholdTrackbarName = "Canny threshold";
 const string SmartPool::accumulatorThresholdTrackbarName = "Accumulator Threshold";
 const string SmartPool::minCircleSizeTrackbarName = "Minimum Radius Size";
 const string SmartPool::maxCircleSizeTrackbarName = "Maximum Radius Size";
 const string SmartPool::distanceBetweenCircleCentersTrackbarName = "Distance Between centers";
 
+//Video Path and Name
+const string SmartPool::videoPathAfterHomeDir = "/Dropbox/Oficinas de Integração 3/images_videos/";
+const string SmartPool::videoName = "smartPoolTest-3.ogv";
+
+
 void SmartPool::init() {
-
-    VideoCapture capture;
-    Mat frame;
-
     createBoardWindow();
 
+    // get your home directory
+    string homedir = getenv("HOME");
+
     // Read the video stream
-    capture.open(cameraDevice);
+    VideoCapture capture;
+    capture.open(homedir.append(videoPathAfterHomeDir).append(videoName));
+    //capture.open(cameraDevice);
 
     if (capture.isOpened()) {
         capture.set(CV_CAP_PROP_FRAME_WIDTH, frameWidth);
         capture.set(CV_CAP_PROP_FRAME_HEIGHT, frameHeight);
 
+        Mat frame;
         for (;;) {
 
             // those paramaters cannot be =0
@@ -47,6 +59,8 @@ void SmartPool::init() {
                 break;
             }
         }
+    } else {
+        printf("Problem Opening Capture \n");
     }
     return;
 }
@@ -94,7 +108,7 @@ void SmartPool::detectAndDisplay(Mat frame) {
     }
 
     //-- Show results
-    imshow("Frame Gray", frameGray);
+    imshow(windowProjectionName, frameGray);
     imshow(windowBoardName, frame);
     //imshow(windowProjectionName, projection);
 }
