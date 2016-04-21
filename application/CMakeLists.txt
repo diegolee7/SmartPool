@@ -7,9 +7,13 @@ file(GLOB .
     "*.cpp"
 )
 
-add_library ( projectionWindow ProjectionWindow.cpp)
 add_executable( smartPool SmartPool.cpp )
 
+add_library ( projectionWindow ProjectionWindow.cpp)
 target_link_libraries( smartPool LINK_PUBLIC projectionWindow )
+
+add_library ( mainWindow MainWindow.cpp)
+target_link_libraries( smartPool LINK_PUBLIC mainWindow )
+
 target_link_libraries( smartPool ${OpenCV_LIBS} )
 
