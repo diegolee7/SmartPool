@@ -4,7 +4,7 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "ProjectionWindow.h"
-#include "MainWindow.h"
+#include "ObjectFinder.h"
 
 using namespace std;
 using namespace cv;
@@ -25,7 +25,7 @@ private:
     static const string videoName;
 
     ProjectionWindow projectionWindow;
-    MainWindow mainWindow;
+    ObjectFinder objectFinder;
 
 public:
     SmartPool();

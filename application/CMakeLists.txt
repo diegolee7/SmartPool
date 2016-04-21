@@ -15,5 +15,8 @@ target_link_libraries( smartPool LINK_PUBLIC projectionWindow )
 add_library ( mainWindow MainWindow.cpp)
 target_link_libraries( smartPool LINK_PUBLIC mainWindow )
 
+add_library ( objectFinder ObjectFinder.cpp)
+target_link_libraries( smartPool LINK_PUBLIC objectFinder )
+
 target_link_libraries( smartPool ${OpenCV_LIBS} )
 
