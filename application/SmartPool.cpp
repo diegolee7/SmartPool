@@ -14,6 +14,7 @@ SmartPool::SmartPool(){
 
 void SmartPool::init() {
 
+
     // get your home directory
     string homedir = getenv("HOME");
 
@@ -53,9 +54,9 @@ void SmartPool::init() {
 void SmartPool::detectAndDisplay(Mat* frame) {
 
     vector<Vec3f> circles = objectFinder.getCircles(frame);
-
     mainWindow.showWindow(frame,circles);
     projectionWindow.showWindow(circles);
+
 
 }
 

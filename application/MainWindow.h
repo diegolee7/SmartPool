@@ -13,10 +13,14 @@ private:
     static const int frameWidth = 1280;
     static const int frameHeight = 720;
     static const string windowName;
+    int mouseX;
+    int mouseY;
 
 public:
     MainWindow();
     void showWindow (Mat* frame, vector<Vec3f> circles);
+    void setMouseCoordinates(int x, int y);
+    void drawCue();
 };
 
 #endif // MAINWINDOW_H
