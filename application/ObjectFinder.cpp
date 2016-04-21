@@ -1,7 +1,7 @@
 #include "ObjectFinder.h"
 
 //Window Names
-const string ObjectFinder::windowName = "Smart Pool";
+const string ObjectFinder::windowName = "Object Finder Parameters";
 
 //TrackBar Names
 const string ObjectFinder::cannyThresholdTrackbarName = "Canny threshold";
@@ -32,7 +32,7 @@ ObjectFinder::ObjectFinder() {
                    &distanceBetweenCircleCenters, maxDistanceBetweenCircleCenters);
 }
 
-void ObjectFinder::showWindow(Mat frame) {
+ vector<Vec3f> ObjectFinder::getCircles(Mat* frame) {
     // those paramaters cannot be =0
     // so we must check here
     cannyThreshold = std::max(cannyThreshold, 1);
@@ -40,31 +40,14 @@ void ObjectFinder::showWindow(Mat frame) {
     distanceBetweenCircleCenters = std::max(distanceBetweenCircleCenters, 1);
 
     // Convert it to gray
-    cvtColor(frame, frameGray, CV_BGR2GRAY);
+    cvtColor(*frame, frameGray, CV_BGR2GRAY);
 
     // Reduce the noise so we avoid false circle detection
-    GaussianBlur(frameGray, frameGray, Size(9, 9), 2, 2);
+    GaussianBlur(frameGray, frameGray, Size(3, 3), 2, 2);
 
-
+    vector<Vec3f> circles;
     HoughCircles(frameGray, circles, CV_HOUGH_GRADIENT, 1, distanceBetweenCircleCenters , cannyThreshold,
                  accumulatorThreshold, minCircleSize, maxCircleSize);
-
-    // Draw Circles on Board frame
-    for (size_t i = 0; i < circles.size(); i++) {
-        Vec3i c = circles[i];
-        circle(frame, Point(c[0], c[1]), c[2], Scalar(0,0,255), 3, CV_AA);
-        circle(frame, Point(c[0], c[1]), 2, Scalar(0,255,0), 3, CV_AA);
-    }
-
-    // Draw Circles on Gray frame with GaussianBlur
-    for (size_t i = 0; i < circles.size(); i++) {
-        Vec3i c = circles[i];
-        circle(frameGray, Point(c[0], c[1]), c[2], Scalar(0,0,255), 3, CV_AA);
-        circle(frameGray, Point(c[0], c[1]), 2, Scalar(0,255,0), 3, CV_AA);
-    }
-    imshow(windowName, frame);
+    return circles;
 }
 
- vector<Vec3f> ObjectFinder::getCircles(){
-     return circles;
- }

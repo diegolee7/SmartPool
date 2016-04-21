@@ -33,7 +33,7 @@ void SmartPool::init() {
 
             // Apply the classifier to the frame
             if (!frame.empty()) {
-                detectAndDisplay(frame);
+                detectAndDisplay(&frame);
             } else {
                 printf(" --(!) No captured frame -- Break!");
                 break;
@@ -50,16 +50,15 @@ void SmartPool::init() {
     return;
 }
 
-void SmartPool::detectAndDisplay(Mat frame) {
+void SmartPool::detectAndDisplay(Mat* frame) {
 
-    objectFinder.showWindow(frame);
-    vector<Vec3f> circles = objectFinder.getCircles();
+    vector<Vec3f> circles = objectFinder.getCircles(frame);
 
+    mainWindow.showWindow(frame,circles);
     //-- Show results
     projectionWindow.clearFrame();
     projectionWindow.drawCircles(circles);
     projectionWindow.showWindow();
-
 
     //imshow("Frame Gray", frameGray);
 

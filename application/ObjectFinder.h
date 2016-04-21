@@ -41,12 +41,10 @@ class ObjectFinder {
     int distanceBetweenCircleCenters;
 
     Mat frameGray;
-    vector<Vec3f> circles;
 
 public:
     ObjectFinder();
-    void showWindow(Mat frame);
-     vector<Vec3f> getCircles();
+    vector<Vec3f> getCircles(Mat* frame);
 };
 
 #endif // OBJECTFINDER_H

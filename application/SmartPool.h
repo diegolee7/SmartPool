@@ -5,6 +5,7 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include "ProjectionWindow.h"
 #include "ObjectFinder.h"
+#include "MainWindow.h"
 
 using namespace std;
 using namespace cv;
@@ -26,11 +27,12 @@ private:
 
     ProjectionWindow projectionWindow;
     ObjectFinder objectFinder;
+    MainWindow mainWindow;
 
 public:
     SmartPool();
     void init();
-    void detectAndDisplay(Mat frame);
+    void detectAndDisplay(Mat* frame);
 
 };
 
