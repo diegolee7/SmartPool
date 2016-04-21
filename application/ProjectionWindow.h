@@ -19,7 +19,7 @@ public:
     ProjectionWindow();
     void createProjectionWindow();
     void drawCircles(vector<Vec3f> circles);
-    void showWindow();
+    void showWindow(vector<Vec3f> circles);
     void clearFrame();
 };
 

@@ -55,12 +55,7 @@ void SmartPool::detectAndDisplay(Mat* frame) {
     vector<Vec3f> circles = objectFinder.getCircles(frame);
 
     mainWindow.showWindow(frame,circles);
-    //-- Show results
-    projectionWindow.clearFrame();
-    projectionWindow.drawCircles(circles);
-    projectionWindow.showWindow();
-
-    //imshow("Frame Gray", frameGray);
+    projectionWindow.showWindow(circles);
 
 }
 

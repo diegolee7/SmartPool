@@ -17,7 +17,9 @@ void ProjectionWindow::drawCircles(vector<Vec3f> circles){
     }
 }
 
-void ProjectionWindow::showWindow(){
+void ProjectionWindow::showWindow(vector<Vec3f> circles){
+    clearFrame();
+    drawCircles(circles);
     imshow(windowProjectionName, frame);
 }
 
