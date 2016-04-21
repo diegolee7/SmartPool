@@ -1,4 +1,4 @@
-#include "smartPool.h"
+#include "SmartPool.h"
 #include <iostream>
 #include <stdio.h>
 #include <string>
@@ -6,7 +6,6 @@
 
 //Window Names
 const string SmartPool::windowBoardName = "Smart Pool";
-const string SmartPool::windowProjectionName = "Projection";
 
 //TrackBar Names
 const string SmartPool::cannyThresholdTrackbarName = "Canny threshold";
@@ -22,6 +21,7 @@ const string SmartPool::videoName = "smartPoolTest-3.ogv";
 
 void SmartPool::init() {
     createBoardWindow();
+
 
     // get your home directory
     string homedir = getenv("HOME");
@@ -69,15 +69,11 @@ void SmartPool::init() {
  * @function detectAndDisplay
  */
 void SmartPool::detectAndDisplay(Mat frame) {
+
     Mat frameGray;
-    Mat projection;
 
     // Convert it to gray
     cvtColor(frame, frameGray, CV_BGR2GRAY);
-
-    //Projection starts black   
-    cvtColor(frame, projection, CV_BGR2GRAY);
-    projection.setTo(Scalar(0));
 
     // Reduce the noise so we avoid false circle detection
     GaussianBlur(frameGray, frameGray, Size(9, 9), 2, 2);
@@ -85,13 +81,6 @@ void SmartPool::detectAndDisplay(Mat frame) {
     vector<Vec3f> circles;
     HoughCircles(frameGray, circles, CV_HOUGH_GRADIENT, 1, distanceBetweenCircleCenters , cannyThreshold,
                  accumulatorThreshold, minCircleSize, maxCircleSize);
-
-    // Draw Circles on Projection frame
-    for (size_t i = 0; i < circles.size(); i++) {
-        Vec3i c = circles[i];
-        circle(projection, Point(c[0], c[1]), c[2], Scalar(255), 3, CV_AA);
-        circle(projection, Point(c[0], c[1]), 2, Scalar(255), 3, CV_AA);
-    }
 
     // Draw Circles on Board frame
     for (size_t i = 0; i < circles.size(); i++) {
@@ -108,9 +97,11 @@ void SmartPool::detectAndDisplay(Mat frame) {
     }
 
     //-- Show results
-    imshow(windowProjectionName, frameGray);
+    projectionWindow.clearFrame();
+    projectionWindow.drawCircles(circles);
+    projectionWindow.showWindow();
+    imshow("Frame Gray", frameGray);
     imshow(windowBoardName, frame);
-    //imshow(windowProjectionName, projection);
 }
 
 void SmartPool::createBoardWindow() {
@@ -133,10 +124,6 @@ void SmartPool::createBoardWindow() {
     createTrackbar(maxCircleSizeTrackbarName, windowBoardName, &maxCircleSize, maxMaxCircleSize);
     createTrackbar(distanceBetweenCircleCentersTrackbarName, windowBoardName, 
                    &distanceBetweenCircleCenters, maxDistanceBetweenCircleCenters);
-}
-
-void SmartPool::createProjectionWindow() {
-    namedWindow(windowProjectionName, WINDOW_AUTOSIZE);
 }
 
 int main() {

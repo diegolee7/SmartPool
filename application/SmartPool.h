@@ -1,16 +1,18 @@
-#include "opencv2/objdetect/objdetect.hpp"
+#ifndef SMARTPOOL_H
+#define SMARTPOOL_H
+
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
+#include "ProjectionWindow.h"
 
 using namespace std;
 using namespace cv;
 
 class SmartPool {
 
-  private:
+private:
     // Window Parameters
     static const string windowBoardName;
-    static const string windowProjectionName;
     static const int frameWidth = 1280;
     static const int frameHeight = 720;
 
@@ -49,9 +51,12 @@ class SmartPool {
     int maxCircleSize;
     int distanceBetweenCircleCenters;
 
-  public:
+    ProjectionWindow projectionWindow;
+
+public:
     void init();
     void detectAndDisplay(Mat frame);
     void createBoardWindow();
-    void createProjectionWindow();
 };
+
+#endif // SMARTPOOL_H
