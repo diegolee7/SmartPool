@@ -57,7 +57,6 @@ void SmartPool::detectAndDisplay(Mat* frame) {
     mainWindow.showWindow(frame,circles);
     projectionWindow.showWindow(circles);
 
-
 }
 
 

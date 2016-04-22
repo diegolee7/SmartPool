@@ -40,9 +40,9 @@ void MainWindow::showWindow (Mat* frame, vector<Vec3f> circles){
         circle(*frame, Point(c[0], c[1]), 2, Scalar(0,255,0), 3, CV_AA);
     }
 
+    //draw Cue
     //line(img, pt1, pt2, color, thickness=1, lineType=8, shift=0)
     line(*frame,Point(640, 360), Point(mouseX, mouseY), Scalar(255,255,0), 4, CV_AA, 0 );
-
 
     imshow(windowName, *frame);
 }
@@ -50,7 +50,4 @@ void MainWindow::showWindow (Mat* frame, vector<Vec3f> circles){
 void MainWindow::setMouseCoordinates(int x, int y){
     mouseX = x;
     mouseY = y;
-}
-
-void MainWindow::drawCue(){
 }
