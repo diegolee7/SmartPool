@@ -9,6 +9,7 @@ using namespace cv;
 
 class ObjectFinder {
 
+private:
     // window name
     static const string windowName;
 
@@ -41,10 +42,13 @@ class ObjectFinder {
     int distanceBetweenCircleCenters;
 
     Mat frameGray;
+    void initControlWindow();
 
 public:
     ObjectFinder();
-    vector<Vec3f> getCircles(Mat* frame);
+    vector<Vec3f> getCircles(Mat frame);
+    void makeHistogram (Mat frame);
+    void segmentBoard (Mat frame);
 };
 
 #endif // OBJECTFINDER_H

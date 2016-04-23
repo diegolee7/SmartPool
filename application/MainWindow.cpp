@@ -32,19 +32,19 @@ MainWindow::MainWindow() {
     mouseY = 0;
 }
 
-void MainWindow::showWindow (Mat* frame, vector<Vec3f> circles){
+void MainWindow::showWindow (Mat frame, vector<Vec3f> circles){
     // Draw Circles on Board frame
     for (size_t i = 0; i < circles.size(); i++) {
         Vec3i c = circles[i];
-        circle(*frame, Point(c[0], c[1]), c[2], Scalar(0,0,255), 3, CV_AA);
-        circle(*frame, Point(c[0], c[1]), 2, Scalar(0,255,0), 3, CV_AA);
+        circle(frame, Point(c[0], c[1]), c[2], Scalar(0,0,255), 1, CV_AA);
+        circle(frame, Point(c[0], c[1]), 2, Scalar(0,255,0), 1, CV_AA);
     }
 
     //draw Cue
     //line(img, pt1, pt2, color, thickness=1, lineType=8, shift=0)
-    line(*frame,Point(640, 360), Point(mouseX, mouseY), Scalar(255,255,0), 4, CV_AA, 0 );
+    //line(frame,Point(640, 360), Point(mouseX, mouseY), Scalar(255,255,0), 4, CV_AA, 0 );
 
-    imshow(windowName, *frame);
+    imshow(windowName, frame);
 }
 
 void MainWindow::setMouseCoordinates(int x, int y){

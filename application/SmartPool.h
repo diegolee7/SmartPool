@@ -29,10 +29,12 @@ private:
     ObjectFinder objectFinder;
     MainWindow mainWindow;
 
+    Mat frame;
+
 public:
     SmartPool();
     void init();
-    void detectAndDisplay(Mat* frame);
+    void detectAndDisplay();
 
 };
 

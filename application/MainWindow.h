@@ -18,7 +18,7 @@ private:
 
 public:
     MainWindow();
-    void showWindow (Mat* frame, vector<Vec3f> circles);
+    void showWindow (Mat frame, vector<Vec3f> circles);
     void setMouseCoordinates(int x, int y);
 };
 

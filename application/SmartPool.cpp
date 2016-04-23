@@ -6,7 +6,7 @@
 
 //Video Path and Name
 const string SmartPool::videoPathAfterHomeDir = "/Dropbox/Oficinas de Integração 3/images_videos/";
-const string SmartPool::videoName = "smartPoolTest-3.ogv";
+const string SmartPool::videoName = "smartPoolTest-2.ogv";
 
 SmartPool::SmartPool(){
 
@@ -20,21 +20,21 @@ void SmartPool::init() {
 
     // Read the video stream
     VideoCapture capture;
-    capture.open(homedir.append(videoPathAfterHomeDir).append(videoName));
-    //capture.open(cameraDevice);
+    //capture.open(homedir.append(videoPathAfterHomeDir).append(videoName));
+    capture.open(cameraDevice);
 
     if (capture.isOpened()) {
         capture.set(CV_CAP_PROP_FRAME_WIDTH, frameWidth);
         capture.set(CV_CAP_PROP_FRAME_HEIGHT, frameHeight);
 
-        Mat frame;
+
         for (;;) {
 
             capture >> frame;
 
             // Apply the classifier to the frame
             if (!frame.empty()) {
-                detectAndDisplay(&frame);
+                detectAndDisplay();
             } else {
                 printf(" --(!) No captured frame -- Break!");
                 break;
@@ -51,11 +51,12 @@ void SmartPool::init() {
     return;
 }
 
-void SmartPool::detectAndDisplay(Mat* frame) {
+void SmartPool::detectAndDisplay() {
 
     vector<Vec3f> circles = objectFinder.getCircles(frame);
     mainWindow.showWindow(frame,circles);
     projectionWindow.showWindow(circles);
+    objectFinder.segmentBoard(frame);
 
 }
 
