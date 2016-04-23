@@ -40,7 +40,7 @@ void SmartPool::init() {
                 break;
             }
 
-            int c = waitKey(10);
+            int c = waitKey(1000);
             if ((char)c == 'c') {
                 break;
             }
@@ -56,7 +56,7 @@ void SmartPool::detectAndDisplay() {
     vector<Vec3f> circles = objectFinder.getCircles(frame);
     mainWindow.showWindow(frame,circles);
     projectionWindow.showWindow(circles);
-    objectFinder.segmentBoard(frame);
+    objectFinder.segmentTable(frame);
 
 }
 

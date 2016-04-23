@@ -47,8 +47,8 @@ private:
 public:
     ObjectFinder();
     vector<Vec3f> getCircles(Mat frame);
-    void makeHistogram (Mat frame);
-    void segmentBoard (Mat frame);
+    void getMostFrequentColor (Mat frame, int* maxBlue, int* maxRed, int* maxGreen) ;
+    void segmentTable (Mat frame);
 };
 
 #endif // OBJECTFINDER_H

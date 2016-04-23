@@ -1,4 +1,5 @@
 #include "ObjectFinder.h"
+#include <iostream>
 
 //Window Names
 const string ObjectFinder::windowName = "Object Finder Parameters";
@@ -64,7 +65,7 @@ void ObjectFinder::initControlWindow(){
     return circles;
 }
 
-void ObjectFinder::makeHistogram (Mat frame) {
+void ObjectFinder::getMostFrequentColor (Mat frame, int* maxBlue, int* maxRed, int* maxGreen) {
 
     /// Separate the image in 3 places ( B, G and R )
     vector<Mat> bgr_planes;
@@ -90,8 +91,25 @@ void ObjectFinder::makeHistogram (Mat frame) {
     int hist_w = 512; int hist_h = 400;
     int bin_w = cvRound( (double) hist_w/histSize );
 
-    Mat histImage( hist_h, hist_w, CV_8UC3, Scalar( 0,0,0) );
 
+    Vec3b color = b_hist.at<Vec3b>(Point(0,255));
+
+    // ... do something to the color ....
+    cout << "\ncolor: "<<color;
+    // set pixel
+    b_hist.at<Vec3b>(Point(0,255)) = color;
+    // save values
+
+    double min, max ;
+    Point minLoc, maxLoc;
+    minMaxLoc(b_hist, &min, &max, &minLoc, &maxLoc);
+    *maxBlue = maxLoc.y;
+    minMaxLoc(g_hist, &min, &max, &minLoc, &maxLoc);
+    *maxGreen = maxLoc.y;
+    minMaxLoc(r_hist, &min, &max, &minLoc, &maxLoc);
+    *maxRed = maxLoc.y;
+
+    Mat histImage( hist_h, hist_w, CV_8UC3, Scalar( 0,0,0) );
     /// Normalize the result to [ 0, histImage.rows ]
     normalize(b_hist, b_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
     normalize(g_hist, g_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
@@ -116,16 +134,58 @@ void ObjectFinder::makeHistogram (Mat frame) {
                          Scalar( 0, 0, 255), 1, 8, 0  );
     }
 
-    double min,maxBlue,maxRed,maxGreen;
-    minMaxLoc(b_hist, &min, &maxBlue);
-    minMaxLoc(g_hist, &min, &maxGreen);
-    minMaxLoc(r_hist, &min, &maxRed);
-
     /// Display
     imshow("Histogram", histImage );
 }
 
-void ObjectFinder::segmentBoard (Mat frame){
-    makeHistogram(frame);
+void ObjectFinder::segmentTable (Mat frame){
+    int maxBlue = 0,maxRed = 0,maxGreen = 0;
+    getMostFrequentColor(frame, &maxBlue, &maxRed, &maxGreen);
 
+    //cout << "\nmax blue: "<<maxBlue;
+    //cout << "\nmax green: "<<maxGreen;
+    //cout << "\nmax red: "<<maxRed;
+
+    //Vec3i color
+    Mat m(1,1, CV_8UC3 ,Scalar(maxBlue,maxGreen, maxRed));
+    std::cout << "\nBGR value: "<< m;
+    cvtColor (m,m, COLOR_BGR2HSV);
+    std::cout << "\nHSV value: "<< m;
+
+    Mat frameHSV;
+    cvtColor(frame, frameHSV, COLOR_BGR2HSV);
+    Mat frameThresholded;
+    Vec3b valuesHSV = m.at<Vec3b>(0,0);
+    int hue = valuesHSV(0);
+    int saturation = valuesHSV(1);
+    int value = valuesHSV(2);
+    int deltaHue = 10;
+    int deltaSaturation = 50;
+    int deltaValue = 50;
+    //inRange(frameHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), frameThresholded);
+    inRange(frameHSV, Scalar(hue-deltaHue, saturation-deltaSaturation, value - deltaValue)
+           ,Scalar(hue+deltaHue, saturation+deltaSaturation, value + deltaValue), frameThresholded);
+
+    //morphological opening (removes small objects from the foreground)
+    erode(frameThresholded, frameThresholded, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)) );
+    dilate(frameThresholded, frameThresholded, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)) );
+
+    //morphological closing (removes small holes from the foreground)
+    dilate(frameThresholded, frameThresholded, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)) );
+    erode(frameThresholded, frameThresholded, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)) );
+
+    imshow("Frame Thresholded", frameThresholded );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
