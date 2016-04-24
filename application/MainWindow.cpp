@@ -1,5 +1,7 @@
 #include "MainWindow.h"
 #include <iostream>
+#define _USE_MATH_DEFINES
+#include <cmath>
 
 const string MainWindow::windowName = "Smart Pool";
 
@@ -52,22 +54,26 @@ void MainWindow::showWindow (Mat frame, vector<Vec3f> circles, vector<Vec3f> whi
     if(whiteBall.size() > 0){
         for (size_t i = 0; i < whiteBall.size(); i++) {
             Vec3i c = whiteBall[i];
-            circle(frame, Point(c[0], c[1]), c[2], Scalar(255,255,0), 2, CV_AA);
-            circle(frame, Point(c[0], c[1]), 2, Scalar(0,255,0), 1, CV_AA);
             whiteBallX = c[0];
             whiteBallY = c[1];
             whiteBallRadius = c[2];
         }
     }
+    circle(frame, Point(whiteBallX, whiteBallY), whiteBallRadius, Scalar(255,255,0), 2, CV_AA);
+    circle(frame, Point(whiteBallX, whiteBallY), 2, Scalar(0,255,0), 1, CV_AA);
 
     //angle between two points
-    //float angle = atan2(whiteBallY - mouseY, whiteBallX- mouseX);
+    float angle = atan2(whiteBallY - mouseY, whiteBallX- mouseX);
+    angle = angle;
+    int xBorder = whiteBallRadius * cos(angle);
+    int yBorder = whiteBallRadius * sin(angle);
+
     int deltaX = whiteBallX - mouseX;
     int deltaY = whiteBallY - mouseY;
 
     //draw Cue
     //line(img, pt1, pt2, color, thickness=1, lineType=8, shift=0);
-    line(frame,Point(whiteBallX + deltaX, whiteBallY + deltaY), Point(whiteBallX, whiteBallY), Scalar(255,0,200), 4, CV_AA, 0 );
+    line(frame,Point(whiteBallX + deltaX, whiteBallY + deltaY), Point(xBorder+whiteBallX, yBorder+whiteBallY), Scalar(255,0,200), 4, CV_AA, 0 );
 
     rectangle(frame, boardUpperLeft, boardBottomRight, Scalar(255,0,255), 2, 8, 0);
 

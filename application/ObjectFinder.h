@@ -28,7 +28,7 @@ private:
     static const int distanceBetweensCentersInitialValue = 45;
 
     // max values of the parameters of interests.
-    static const int maxAccumulatorThreshold = 200;
+    static const int maxAccumulatorThreshold = 400;
     static const int maxCannyThreshold = 255;
     static const int maxMinCircleSize = 100;
     static const int maxMaxCircleSize = 100;
@@ -48,6 +48,7 @@ private:
     int maxValue;
     int minHue;
     int maxHue;
+    int dp;
 
     Mat frameGray;
     void initControlWindow();

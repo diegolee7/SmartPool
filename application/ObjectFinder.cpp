@@ -38,6 +38,9 @@ void ObjectFinder::initControlWindow(){
     createTrackbar(distanceBetweenCircleCentersTrackbarName, windowName,
                    &distanceBetweenCircleCenters, maxDistanceBetweenCircleCenters);
 
+    dp = 100;
+    createTrackbar("dp", windowName, &dp, 500);
+
     //threshold tackbars
     minHue = 60;
     maxHue = 98;
@@ -66,12 +69,12 @@ void ObjectFinder::initControlWindow(){
     cvtColor(frame, frameGray, CV_BGR2GRAY);
 
     // Reduce the noise so we avoid false circle detection
-    GaussianBlur(frameGray, frameGray, Size(15, 15), 5, 5);
+    GaussianBlur(frameGray, frameGray, Size(9 , 9), 2, 2);
 
     //Canny( frameGray, frameGray, cannyThreshold, cannyThreshold*3, 3 );
 
     vector<Vec3f> circles;
-    HoughCircles(frameGray, circles, CV_HOUGH_GRADIENT, 1, distanceBetweenCircleCenters , cannyThreshold,
+    HoughCircles(frameGray, circles, CV_HOUGH_GRADIENT, (double)dp/100, distanceBetweenCircleCenters , cannyThreshold,
                  accumulatorThreshold, minCircleSize, maxCircleSize);
 
     Canny( frameGray, frameGray, cannyThreshold, cannyThreshold*3, 3 );
@@ -88,78 +91,6 @@ void ObjectFinder::initControlWindow(){
     return circles;
 }
 
-void ObjectFinder::findMostFrequentColor (Mat frame) {
-
-    /// Separate the image in 3 places ( B, G and R )
-    vector<Mat> bgr_planes;
-    split( frame, bgr_planes );
-
-    /// Establish the number of bins
-    int histSize = 256;
-
-    /// Set the ranges ( for B,G,R) )
-    float range[] = { 0, 256 } ;
-    const float* histRange = { range };
-
-    bool uniform = true; bool accumulate = false;
-
-    Mat b_hist, g_hist, r_hist;
-
-    /// Compute the histograms:
-    calcHist( &bgr_planes[0], 1, 0, Mat(), b_hist, 1, &histSize, &histRange, uniform, accumulate );
-    calcHist( &bgr_planes[1], 1, 0, Mat(), g_hist, 1, &histSize, &histRange, uniform, accumulate );
-    calcHist( &bgr_planes[2], 1, 0, Mat(), r_hist, 1, &histSize, &histRange, uniform, accumulate );
-
-    // Draw the histograms for B, G and R
-    int hist_w = 512; int hist_h = 400;
-    int bin_w = cvRound( (double) hist_w/histSize );
-
-
-    Vec3b color = b_hist.at<Vec3b>(Point(0,255));
-
-    // ... do something to the color ....
-    cout << "\ncolor: "<<color;
-    // set pixel
-    b_hist.at<Vec3b>(Point(0,255)) = color;
-    // save values
-
-    double min, max ;
-    Point minLoc, maxLoc;
-    minMaxLoc(b_hist, &min, &max, &minLoc, &maxLoc);
-    maxBlue = maxLoc.y;
-    minMaxLoc(g_hist, &min, &max, &minLoc, &maxLoc);
-    maxGreen = maxLoc.y;
-    minMaxLoc(r_hist, &min, &max, &minLoc, &maxLoc);
-    maxRed = maxLoc.y;
-
-    Mat histImage( hist_h, hist_w, CV_8UC3, Scalar( 0,0,0) );
-    /// Normalize the result to [ 0, histImage.rows ]
-    normalize(b_hist, b_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
-    normalize(g_hist, g_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
-    normalize(r_hist, r_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
-
-    //b_hist = b_hist/100;
-    //g_hist = g_hist/100;
-    //r_hist = r_hist/100;
-
-
-    /// Draw for each channel
-    for( int i = 1; i < histSize; i++ )
-    {
-        line( histImage, Point( bin_w*(i-1), hist_h - cvRound(b_hist.at<float>(i-1)) ) ,
-                         Point( bin_w*(i), hist_h - cvRound(b_hist.at<float>(i)) ),
-                         Scalar( 255, 0, 0), 1, 8, 0  );
-        line( histImage, Point( bin_w*(i-1), hist_h - cvRound(g_hist.at<float>(i-1)) ) ,
-                         Point( bin_w*(i), hist_h - cvRound(g_hist.at<float>(i)) ),
-                         Scalar( 0, 255, 0), 1, 8, 0  );
-        line( histImage, Point( bin_w*(i-1), hist_h - cvRound(r_hist.at<float>(i-1)) ) ,
-                         Point( bin_w*(i), hist_h - cvRound(r_hist.at<float>(i)) ),
-                         Scalar( 0, 0, 255), 1, 8, 0  );
-    }
-
-    /// Display
-    imshow("Histogram", histImage );
-}
 
 Mat ObjectFinder::segmentTable (Mat frame){
 
@@ -237,7 +168,7 @@ vector<Vec3f> ObjectFinder::findWhiteBall(Mat frame){
     GaussianBlur(frameThresholded, frameThresholded, Size(15, 15), 5, 5);
 
     vector<Vec3f> circles;
-    HoughCircles(frameThresholded, circles, CV_HOUGH_GRADIENT, 1, distanceBetweenCircleCenters , cannyThreshold,
+    HoughCircles(frameThresholded, circles, CV_HOUGH_GRADIENT, (double)dp/100, distanceBetweenCircleCenters , cannyThreshold,
                  30, minCircleSize, maxCircleSize);
 
     for (size_t i = 0; i < circles.size(); i++) {
@@ -253,6 +184,78 @@ vector<Vec3f> ObjectFinder::findWhiteBall(Mat frame){
 
 
 
+void ObjectFinder::findMostFrequentColor (Mat frame) {
+
+    /// Separate the image in 3 places ( B, G and R )
+    vector<Mat> bgr_planes;
+    split( frame, bgr_planes );
+
+    /// Establish the number of bins
+    int histSize = 256;
+
+    /// Set the ranges ( for B,G,R) )
+    float range[] = { 0, 256 } ;
+    const float* histRange = { range };
+
+    bool uniform = true; bool accumulate = false;
+
+    Mat b_hist, g_hist, r_hist;
+
+    /// Compute the histograms:
+    calcHist( &bgr_planes[0], 1, 0, Mat(), b_hist, 1, &histSize, &histRange, uniform, accumulate );
+    calcHist( &bgr_planes[1], 1, 0, Mat(), g_hist, 1, &histSize, &histRange, uniform, accumulate );
+    calcHist( &bgr_planes[2], 1, 0, Mat(), r_hist, 1, &histSize, &histRange, uniform, accumulate );
+
+    // Draw the histograms for B, G and R
+    int hist_w = 512; int hist_h = 400;
+    int bin_w = cvRound( (double) hist_w/histSize );
+
+
+    Vec3b color = b_hist.at<Vec3b>(Point(0,255));
+
+    // ... do something to the color ....
+    cout << "\ncolor: "<<color;
+    // set pixel
+    b_hist.at<Vec3b>(Point(0,255)) = color;
+    // save values
+
+    double min, max ;
+    Point minLoc, maxLoc;
+    minMaxLoc(b_hist, &min, &max, &minLoc, &maxLoc);
+    maxBlue = maxLoc.y;
+    minMaxLoc(g_hist, &min, &max, &minLoc, &maxLoc);
+    maxGreen = maxLoc.y;
+    minMaxLoc(r_hist, &min, &max, &minLoc, &maxLoc);
+    maxRed = maxLoc.y;
+
+    Mat histImage( hist_h, hist_w, CV_8UC3, Scalar( 0,0,0) );
+    /// Normalize the result to [ 0, histImage.rows ]
+    normalize(b_hist, b_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
+    normalize(g_hist, g_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
+    normalize(r_hist, r_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
+
+    //b_hist = b_hist/100;
+    //g_hist = g_hist/100;
+    //r_hist = r_hist/100;
+
+
+    /// Draw for each channel
+    for( int i = 1; i < histSize; i++ )
+    {
+        line( histImage, Point( bin_w*(i-1), hist_h - cvRound(b_hist.at<float>(i-1)) ) ,
+                         Point( bin_w*(i), hist_h - cvRound(b_hist.at<float>(i)) ),
+                         Scalar( 255, 0, 0), 1, 8, 0  );
+        line( histImage, Point( bin_w*(i-1), hist_h - cvRound(g_hist.at<float>(i-1)) ) ,
+                         Point( bin_w*(i), hist_h - cvRound(g_hist.at<float>(i)) ),
+                         Scalar( 0, 255, 0), 1, 8, 0  );
+        line( histImage, Point( bin_w*(i-1), hist_h - cvRound(r_hist.at<float>(i-1)) ) ,
+                         Point( bin_w*(i), hist_h - cvRound(r_hist.at<float>(i)) ),
+                         Scalar( 0, 0, 255), 1, 8, 0  );
+    }
+
+    /// Display
+    imshow("Histogram", histImage );
+}
 
 
 
