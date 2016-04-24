@@ -9,7 +9,7 @@ const string SmartPool::videoPathAfterHomeDir = "/Dropbox/Oficinas de IntegraÃ§Ã
 const string SmartPool::videoName = "smartPoolTest-2.ogv";
 
 SmartPool::SmartPool(){
-
+    drawTableBoard = false;
 }
 
 void SmartPool::init() {
@@ -27,7 +27,8 @@ void SmartPool::init() {
         capture.set(CV_CAP_PROP_FRAME_WIDTH, frameWidth);
         capture.set(CV_CAP_PROP_FRAME_HEIGHT, frameHeight);
 
-
+        capture >> frame;
+        objectFinder.findMostFrequentColor(frame);
         for (;;) {
 
             capture >> frame;
@@ -40,7 +41,8 @@ void SmartPool::init() {
                 break;
             }
 
-            int c = waitKey(1000);
+            int c = waitKey(10);
+
             if ((char)c == 'c') {
                 break;
             }
@@ -53,11 +55,14 @@ void SmartPool::init() {
 
 void SmartPool::detectAndDisplay() {
 
-    vector<Vec3f> circles = objectFinder.getCircles(frame);
+
+    Mat segmentedFrame = objectFinder.segmentTable(frame);
+
+    vector<Vec3f> circles = objectFinder.getCircles(segmentedFrame);
+
+    //show
     mainWindow.showWindow(frame,circles);
     projectionWindow.showWindow(circles);
-    objectFinder.segmentTable(frame);
-
 }
 
 

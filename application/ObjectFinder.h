@@ -41,14 +41,27 @@ private:
     int maxCircleSize;
     int distanceBetweenCircleCenters;
 
+    //
+    int minSaturation;
+    int maxSaturation;
+    int minValue;
+    int maxValue;
+    int minHue;
+    int maxHue;
+
     Mat frameGray;
     void initControlWindow();
+    int maxBlue;
+    int maxRed;
+    int maxGreen;
+
+    bool showBalls;
 
 public:
     ObjectFinder();
     vector<Vec3f> getCircles(Mat frame);
-    void getMostFrequentColor (Mat frame, int* maxBlue, int* maxRed, int* maxGreen) ;
-    void segmentTable (Mat frame);
+    void findMostFrequentColor (Mat frame) ;
+    Mat segmentTable (Mat frame);
 };
 
 #endif // OBJECTFINDER_H

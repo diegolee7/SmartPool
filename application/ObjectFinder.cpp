@@ -2,7 +2,7 @@
 #include <iostream>
 
 //Window Names
-const string ObjectFinder::windowName = "Object Finder Parameters";
+const string ObjectFinder::windowName = "Control";
 
 //TrackBar Names
 const string ObjectFinder::cannyThresholdTrackbarName = "Canny threshold";
@@ -15,6 +15,7 @@ const string ObjectFinder::distanceBetweenCircleCentersTrackbarName = "Distance 
 ObjectFinder::ObjectFinder() {
     initControlWindow();
     namedWindow("Histogram", WINDOW_AUTOSIZE );
+    showBalls = false;
 }
 
 void ObjectFinder::initControlWindow(){
@@ -36,6 +37,22 @@ void ObjectFinder::initControlWindow(){
     createTrackbar(maxCircleSizeTrackbarName, windowName, &maxCircleSize, maxMaxCircleSize);
     createTrackbar(distanceBetweenCircleCentersTrackbarName, windowName,
                    &distanceBetweenCircleCenters, maxDistanceBetweenCircleCenters);
+
+    //threshold tackbars
+    minHue = 60;
+    maxHue = 98;
+    minSaturation = 66;
+    maxSaturation = 158;
+    minValue = 30;
+    maxValue = 220;
+    createTrackbar("minHue", windowName, &minHue, 180);
+    createTrackbar("maxHue", windowName, &maxHue, 180);
+    createTrackbar("minSaturation", windowName, &minSaturation, 255);
+    createTrackbar("maxSaturation", windowName, &maxSaturation, 255);
+    createTrackbar("minValue", windowName, &minValue, 255);
+    createTrackbar("maxValue", windowName, &maxValue, 255);
+
+
 }
 
  vector<Vec3f> ObjectFinder::getCircles(Mat frame) {
@@ -49,23 +66,29 @@ void ObjectFinder::initControlWindow(){
     cvtColor(frame, frameGray, CV_BGR2GRAY);
 
     // Reduce the noise so we avoid false circle detection
-    GaussianBlur(frameGray, frameGray, Size(3, 3), 2, 2);
+    GaussianBlur(frameGray, frameGray, Size(15, 15), 5, 5);
+
+    //Canny( frameGray, frameGray, cannyThreshold, cannyThreshold*3, 3 );
 
     vector<Vec3f> circles;
     HoughCircles(frameGray, circles, CV_HOUGH_GRADIENT, 1, distanceBetweenCircleCenters , cannyThreshold,
                  accumulatorThreshold, minCircleSize, maxCircleSize);
 
+    Canny( frameGray, frameGray, cannyThreshold, cannyThreshold*3, 3 );
+    cvtColor(frameGray, frameGray, CV_GRAY2BGR);
+
     // Draw Circles on Gray frame with GaussianBlur
     for (size_t i = 0; i < circles.size(); i++) {
         Vec3i c = circles[i];
-        //circle(frameGray, Point(c[0], c[1]), c[2], Scalar(0,0,255), 3, CV_AA);
-        //circle(frameGray, Point(c[0], c[1]), 2, Scalar(0,255,0), 3, CV_AA);
+        circle(frameGray, Point(c[0], c[1]), c[2], Scalar(0,0,255), 1, CV_AA);
+        circle(frameGray, Point(c[0], c[1]), 2, Scalar(0,255,0), 1, CV_AA);
     }
 
+    imshow("Frame Blur", frameGray );
     return circles;
 }
 
-void ObjectFinder::getMostFrequentColor (Mat frame, int* maxBlue, int* maxRed, int* maxGreen) {
+void ObjectFinder::findMostFrequentColor (Mat frame) {
 
     /// Separate the image in 3 places ( B, G and R )
     vector<Mat> bgr_planes;
@@ -103,11 +126,11 @@ void ObjectFinder::getMostFrequentColor (Mat frame, int* maxBlue, int* maxRed, i
     double min, max ;
     Point minLoc, maxLoc;
     minMaxLoc(b_hist, &min, &max, &minLoc, &maxLoc);
-    *maxBlue = maxLoc.y;
+    maxBlue = maxLoc.y;
     minMaxLoc(g_hist, &min, &max, &minLoc, &maxLoc);
-    *maxGreen = maxLoc.y;
+    maxGreen = maxLoc.y;
     minMaxLoc(r_hist, &min, &max, &minLoc, &maxLoc);
-    *maxRed = maxLoc.y;
+    maxRed = maxLoc.y;
 
     Mat histImage( hist_h, hist_w, CV_8UC3, Scalar( 0,0,0) );
     /// Normalize the result to [ 0, histImage.rows ]
@@ -138,13 +161,15 @@ void ObjectFinder::getMostFrequentColor (Mat frame, int* maxBlue, int* maxRed, i
     imshow("Histogram", histImage );
 }
 
-void ObjectFinder::segmentTable (Mat frame){
-    int maxBlue = 0,maxRed = 0,maxGreen = 0;
-    getMostFrequentColor(frame, &maxBlue, &maxRed, &maxGreen);
+Mat ObjectFinder::segmentTable (Mat frame){
 
     //cout << "\nmax blue: "<<maxBlue;
     //cout << "\nmax green: "<<maxGreen;
     //cout << "\nmax red: "<<maxRed;
+    int c = waitKey(10);
+    if ((char)c == 'n') {
+        showBalls = !showBalls;
+    }
 
     //Vec3i color
     Mat m(1,1, CV_8UC3 ,Scalar(maxBlue,maxGreen, maxRed));
@@ -159,12 +184,15 @@ void ObjectFinder::segmentTable (Mat frame){
     int hue = valuesHSV(0);
     int saturation = valuesHSV(1);
     int value = valuesHSV(2);
-    int deltaHue = 10;
-    int deltaSaturation = 50;
-    int deltaValue = 50;
+    int deltaHue = 5;
+
+    cout << "\nMost frequent Hue: " << hue;
+    cout << "\nMost frequent Saturation: " << saturation;
+    cout << "\nMost frequent Value: " << value;
+
     //inRange(frameHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), frameThresholded);
-    inRange(frameHSV, Scalar(hue-deltaHue, saturation-deltaSaturation, value - deltaValue)
-           ,Scalar(hue+deltaHue, saturation+deltaSaturation, value + deltaValue), frameThresholded);
+    inRange(frameHSV, Scalar(minHue,minSaturation,minValue)
+           ,Scalar(maxHue, maxSaturation, maxValue), frameThresholded);
 
     //morphological opening (removes small objects from the foreground)
     erode(frameThresholded, frameThresholded, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)) );
@@ -174,7 +202,14 @@ void ObjectFinder::segmentTable (Mat frame){
     dilate(frameThresholded, frameThresholded, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)) );
     erode(frameThresholded, frameThresholded, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)) );
 
+    cvtColor(frameThresholded, frameThresholded, CV_GRAY2BGR);
+    if(showBalls){
+        bitwise_not(frameThresholded,frameThresholded);
+        bitwise_and(frame, frameThresholded, frameThresholded);
+        cout << "show balls: " << showBalls;
+    }
     imshow("Frame Thresholded", frameThresholded );
+    return frameThresholded;
 }
 
 
