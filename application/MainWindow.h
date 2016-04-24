@@ -15,11 +15,14 @@ private:
     static const string windowName;
     int mouseX;
     int mouseY;
+    int whiteBallX;
+    int whiteBallY;
+    int whiteBallRadius;
 
 
 public:
     MainWindow();
-    void showWindow (Mat frame, vector<Vec3f> circles);
+    void showWindow (Mat frame, vector<Vec3f> circles, vector<Vec3f> whiteBall);
     void setMouseCoordinates(int x, int y);
     Point boardUpperLeft;
     Point boardBottomRight;

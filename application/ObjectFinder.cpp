@@ -163,13 +163,11 @@ void ObjectFinder::findMostFrequentColor (Mat frame) {
 
 Mat ObjectFinder::segmentTable (Mat frame){
 
+    //the commented part can be used later for auto finding table color
+    /*
     //cout << "\nmax blue: "<<maxBlue;
     //cout << "\nmax green: "<<maxGreen;
     //cout << "\nmax red: "<<maxRed;
-    int c = waitKey(10);
-    if ((char)c == 'n') {
-        showBalls = !showBalls;
-    }
 
     //Vec3i color
     Mat m(1,1, CV_8UC3 ,Scalar(maxBlue,maxGreen, maxRed));
@@ -177,18 +175,19 @@ Mat ObjectFinder::segmentTable (Mat frame){
     cvtColor (m,m, COLOR_BGR2HSV);
     std::cout << "\nHSV value: "<< m;
 
-    Mat frameHSV;
-    cvtColor(frame, frameHSV, COLOR_BGR2HSV);
-    Mat frameThresholded;
     Vec3b valuesHSV = m.at<Vec3b>(0,0);
     int hue = valuesHSV(0);
     int saturation = valuesHSV(1);
     int value = valuesHSV(2);
     int deltaHue = 5;
 
-    cout << "\nMost frequent Hue: " << hue;
-    cout << "\nMost frequent Saturation: " << saturation;
-    cout << "\nMost frequent Value: " << value;
+    //cout << "\nMost frequent Hue: " << hue;
+    //cout << "\nMost frequent Saturation: " << saturation;
+    //cout << "\nMost frequent Value: " << value;
+*/
+    Mat frameThresholded;
+    Mat frameHSV;
+    cvtColor(frame, frameHSV, COLOR_BGR2HSV);
 
     //inRange(frameHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), frameThresholded);
     inRange(frameHSV, Scalar(minHue,minSaturation,minValue)
@@ -203,6 +202,11 @@ Mat ObjectFinder::segmentTable (Mat frame){
     erode(frameThresholded, frameThresholded, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)) );
 
     cvtColor(frameThresholded, frameThresholded, CV_GRAY2BGR);
+
+    int c = waitKey(10);
+    if ((char)c == 'n') {
+        showBalls = !showBalls;
+    }
     if(showBalls){
         bitwise_not(frameThresholded,frameThresholded);
         bitwise_and(frame, frameThresholded, frameThresholded);
@@ -210,6 +214,38 @@ Mat ObjectFinder::segmentTable (Mat frame){
     }
     imshow("Frame Thresholded", frameThresholded );
     return frameThresholded;
+}
+
+vector<Vec3f> ObjectFinder::findWhiteBall(Mat frame){
+    Mat frameThresholded;
+    Mat frameHSV;
+    cvtColor(frame, frameHSV, COLOR_BGR2HSV);
+
+    //inRange(frameHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), frameThresholded);
+    inRange(frameHSV, Scalar(0,0,213)
+           ,Scalar(180, 58, 255), frameThresholded);
+
+    //morphological opening (removes small objects from the foreground)
+    erode(frameThresholded, frameThresholded, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)) );
+    dilate(frameThresholded, frameThresholded, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)) );
+
+    //morphological closing (removes small holes from the foreground)
+    dilate(frameThresholded, frameThresholded, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)) );
+    erode(frameThresholded, frameThresholded, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)) );
+
+    // Reduce the noise so we avoid false circle detection
+    GaussianBlur(frameThresholded, frameThresholded, Size(15, 15), 5, 5);
+
+    vector<Vec3f> circles;
+    HoughCircles(frameThresholded, circles, CV_HOUGH_GRADIENT, 1, distanceBetweenCircleCenters , cannyThreshold,
+                 30, minCircleSize, maxCircleSize);
+
+    for (size_t i = 0; i < circles.size(); i++) {
+        Vec3i c = circles[i];
+        cout << "\nWhite ball: (" << c[0] << "," << c[1] << ") radius=" << c[2];
+    }
+
+    return circles;
 }
 
 

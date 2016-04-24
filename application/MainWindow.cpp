@@ -13,16 +13,16 @@ void CallBackFunc(int event, int x, int y, int flags, void* userdata)
 
     else if  ( event == EVENT_LBUTTONDOWN ) {
         cout << "Left button of the mouse is clicked - position (" << x << ", " << y << ")";
-        window->boardUpperLeft.x = x;
-        window->boardUpperLeft.y = y;
     }
     else if  ( event == EVENT_RBUTTONDOWN ) {
         cout << "Right button of the mouse is clicked - position (" << x << ", " << y << ")";
-        window->boardBottomRight.x = x;
-        window->boardBottomRight.y = y;
+        window->boardUpperLeft.x = x;
+        window->boardUpperLeft.y = y;
     }
     else if  ( event == EVENT_MBUTTONDOWN ) {
          cout << "Middle button of the mouse is clicked - position (" << x << ", " << y << ")" << endl;
+         window->boardBottomRight.x = x;
+         window->boardBottomRight.y = y;
     }
 
 }
@@ -41,7 +41,7 @@ MainWindow::MainWindow() {
 
 }
 
-void MainWindow::showWindow (Mat frame, vector<Vec3f> circles){
+void MainWindow::showWindow (Mat frame, vector<Vec3f> circles, vector<Vec3f> whiteBall){
     // Draw Circles on Board frame
     for (size_t i = 0; i < circles.size(); i++) {
         Vec3i c = circles[i];
@@ -49,9 +49,25 @@ void MainWindow::showWindow (Mat frame, vector<Vec3f> circles){
         circle(frame, Point(c[0], c[1]), 2, Scalar(0,255,0), 1, CV_AA);
     }
 
+    if(whiteBall.size() > 0){
+        for (size_t i = 0; i < whiteBall.size(); i++) {
+            Vec3i c = whiteBall[i];
+            circle(frame, Point(c[0], c[1]), c[2], Scalar(255,255,0), 2, CV_AA);
+            circle(frame, Point(c[0], c[1]), 2, Scalar(0,255,0), 1, CV_AA);
+            whiteBallX = c[0];
+            whiteBallY = c[1];
+            whiteBallRadius = c[2];
+        }
+    }
+
+    //angle between two points
+    //float angle = atan2(whiteBallY - mouseY, whiteBallX- mouseX);
+    int deltaX = whiteBallX - mouseX;
+    int deltaY = whiteBallY - mouseY;
+
     //draw Cue
-    //line(img, pt1, pt2, color, thickness=1, lineType=8, shift=0)
-    //line(frame,Point(640, 360), Point(mouseX, mouseY), Scalar(255,255,0), 4, CV_AA, 0 );
+    //line(img, pt1, pt2, color, thickness=1, lineType=8, shift=0);
+    line(frame,Point(whiteBallX + deltaX, whiteBallY + deltaY), Point(whiteBallX, whiteBallY), Scalar(255,0,200), 4, CV_AA, 0 );
 
     rectangle(frame, boardUpperLeft, boardBottomRight, Scalar(255,0,255), 2, 8, 0);
 

@@ -62,6 +62,7 @@ public:
     vector<Vec3f> getCircles(Mat frame);
     void findMostFrequentColor (Mat frame) ;
     Mat segmentTable (Mat frame);
+    vector<Vec3f> findWhiteBall(Mat frame);
 };
 
 #endif // OBJECTFINDER_H
