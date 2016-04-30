@@ -75,7 +75,10 @@ void MainWindow::showWindow (Mat frame, vector<Vec3f> circles, vector<Vec3f> whi
     //line(img, pt1, pt2, color, thickness=1, lineType=8, shift=0);
     line(frame,Point(whiteBallX + deltaX, whiteBallY + deltaY), Point(xBorder+whiteBallX, yBorder+whiteBallY), Scalar(255,0,200), 4, CV_AA, 0 );
 
-    rectangle(frame, boardUpperLeft, boardBottomRight, Scalar(255,0,255), 2, 8, 0);
+    Rect tableRectangle = Rect (boardUpperLeft,boardBottomRight);
+    rectangle(frame, tableRectangle, Scalar(255,0,255), 2, 8, 0);
+
+    //tableRectangle.in
 
     imshow(windowName, frame);
 }

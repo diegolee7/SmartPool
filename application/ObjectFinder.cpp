@@ -150,11 +150,11 @@ Mat ObjectFinder::segmentTable (Mat frame){
 vector<Vec3f> ObjectFinder::findWhiteBall(Mat frame){
     Mat frameThresholded;
     Mat frameHSV;
-    cvtColor(frame, frameHSV, COLOR_BGR2HSV);
+    //vtColor(frame, frameHSV, COLOR_BGR2HSV);
 
     //inRange(frameHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), frameThresholded);
-    inRange(frameHSV, Scalar(0,0,213)
-           ,Scalar(180, 58, 255), frameThresholded);
+    inRange(frame, Scalar(200,200,200)
+           ,Scalar(255, 255, 255), frameThresholded);
 
     //morphological opening (removes small objects from the foreground)
     erode(frameThresholded, frameThresholded, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)) );

@@ -20,8 +20,8 @@ void SmartPool::init() {
 
     // Read the video stream
     VideoCapture capture;
-    //capture.open(homedir.append(videoPathAfterHomeDir).append(videoName));
-    capture.open(cameraDevice);
+    capture.open(homedir.append(videoPathAfterHomeDir).append(videoName));
+    //capture.open(cameraDevice);
 
     if (capture.isOpened()) {
         capture.set(CV_CAP_PROP_FRAME_WIDTH, frameWidth);
