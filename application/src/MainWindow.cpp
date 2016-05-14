@@ -64,7 +64,7 @@ void MainWindow::showWindow (Mat frame, vector<Vec3f> circles, vector<Vec3f> whi
 
     //angle between two points
     float angle = atan2(whiteBallY - mouseY, whiteBallX- mouseX);
-    angle = angle;
+    //angle = angle;
     int xBorder = whiteBallRadius * cos(angle);
     int yBorder = whiteBallRadius * sin(angle);
 
