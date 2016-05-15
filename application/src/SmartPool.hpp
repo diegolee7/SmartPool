@@ -4,8 +4,8 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
+#include "FrameProcessor.hpp"
 #include "MainWindow.hpp"
-#include "ObjectFinder.hpp"
 #include "ProjectionWindow.hpp"
 
 using namespace std;
@@ -27,7 +27,7 @@ private:
     static const string videoName;
 
     ProjectionWindow projectionWindow;
-    ObjectFinder objectFinder;
+    FrameProcessor frameProcessor;
     MainWindow mainWindow;
 
     Mat frame;

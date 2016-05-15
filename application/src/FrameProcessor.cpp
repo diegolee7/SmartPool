@@ -1,9 +1,9 @@
-#include "ObjectFinder.hpp"
+#include "FrameProcessor.hpp"
 
 #include <iostream>
 
 
-ObjectFinder::ObjectFinder() {
+FrameProcessor::FrameProcessor() {
 
     namedWindow("Histogram", WINDOW_AUTOSIZE );
     showBalls = false;
@@ -15,7 +15,7 @@ ObjectFinder::ObjectFinder() {
     updateControlVariables();
 }
 
-void ObjectFinder::updateControlVariables(){
+void FrameProcessor::updateControlVariables(){
 	// Hough Circles Variables
     cannyThreshold = controlWindow.getCannyThreshold();
     accumulatorThreshold = controlWindow.getAccumulatorThreshold();
@@ -33,12 +33,48 @@ void ObjectFinder::updateControlVariables(){
     maxHue = controlWindow.getMaxHue();
 }
 
+void FrameProcessor::processFrame(Mat frame){
+	//findMostFrequentColor(frame);
+	updateControlVariables();
+	Mat subtractedFrame = backgroundSubtract(frame);
+	//segmentTable(frame);
+	findAllBalls(subtractedFrame);
+	//findWhiteBall(frame);
 
 
- vector<Vec3f> ObjectFinder::getCircles(Mat frame) {
-	 updateControlVariables();
-    // Convert it to gray
-    cvtColor(frame, frameGray, CV_BGR2GRAY);
+}
+
+Mat FrameProcessor::backgroundSubtract(Mat frame) {
+	//update the background model
+	pMOG->operator()(frame, fgMaskMOG);
+	pMOG2->operator()(frame, fgMaskMOG2);
+
+	//get the frame number and write it on the current frame
+	//stringstream ss;
+	//rectangle(frame, cv::Point(10, 2), cv::Point(100,20),
+	//	cv::Scalar(255,255,255), -1);
+	//ss << capture.get(CV_CAP_PROP_POS_FRAMES);
+	//string frameNumberString = ss.str();
+	//putText(frame, frameNumberString.c_str(), cv::Point(15, 15),
+		//FONT_HERSHEY_SIMPLEX, 0.5 , cv::Scalar(0,0,0));
+
+	//show the current frame and the fg masks
+	//imshow("Frame", frame);
+	imshow("FG Mask MOG", fgMaskMOG);
+	imshow("FG Mask MOG 2", fgMaskMOG2);
+	return fgMaskMOG;
+}
+
+
+ vector<Vec3f> FrameProcessor::findAllBalls(Mat frame) {
+
+	//Check if frame is colored
+	if (frame.channels() == 3) {
+		// Convert it to gray
+		cvtColor(frame, frameGray, CV_BGR2GRAY);
+	} else {
+		frameGray = frame;
+	}
 
     // Reduce the noise so we avoid false circle detection
     GaussianBlur(frameGray, frameGray, Size(9 , 9), 2, 2);
@@ -64,8 +100,7 @@ void ObjectFinder::updateControlVariables(){
 }
 
 
-Mat ObjectFinder::segmentTable (Mat frame){
-	updateControlVariables();
+Mat FrameProcessor::segmentTable (Mat frame){
     //the commented part can be used later for auto finding table color
     /*
     //cout << "\nmax blue: "<<maxBlue;
@@ -119,8 +154,7 @@ Mat ObjectFinder::segmentTable (Mat frame){
     return frameThresholded;
 }
 
-vector<Vec3f> ObjectFinder::findWhiteBall(Mat frame){
-	updateControlVariables();
+vector<Vec3f> FrameProcessor::findWhiteBall(Mat frame){
     Mat frameThresholded;
     Mat frameHSV;
     //vtColor(frame, frameHSV, COLOR_BGR2HSV);
@@ -153,8 +187,7 @@ vector<Vec3f> ObjectFinder::findWhiteBall(Mat frame){
 }
 
 
-void ObjectFinder::findMostFrequentColor (Mat frame) {
-
+void FrameProcessor::findMostFrequentColor (Mat frame) {
     /// Separate the image in 3 places ( B, G and R )
     vector<Mat> bgr_planes;
     split( frame, bgr_planes );
@@ -227,31 +260,8 @@ void ObjectFinder::findMostFrequentColor (Mat frame) {
 }
 
 
-void ObjectFinder::backgroundSubtract(Mat frame) {
-
-	//update the background model
-	pMOG->operator()(frame, fgMaskMOG);
-	pMOG2->operator()(frame, fgMaskMOG2);
-	//get the frame number and write it on the current frame
-	stringstream ss;
-	rectangle(frame, cv::Point(10, 2), cv::Point(100,20),
-		cv::Scalar(255,255,255), -1);
-	//ss << capture.get(CV_CAP_PROP_POS_FRAMES);
-	//string frameNumberString = ss.str();
-	//putText(frame, frameNumberString.c_str(), cv::Point(15, 15),
-		//FONT_HERSHEY_SIMPLEX, 0.5 , cv::Scalar(0,0,0));
-	//show the current frame and the fg masks
-	//imshow("Frame", frame);
-	imshow("FG Mask MOG", fgMaskMOG);
-	imshow("FG Mask MOG 2", fgMaskMOG2);
 
 
-}
-
-void ObjectFinder::processFrame(Mat frame){
-	updateControlVariables();
-	getCircles(frame);
-}
 
 
 

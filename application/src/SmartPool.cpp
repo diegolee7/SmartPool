@@ -29,7 +29,6 @@ void SmartPool::init() {
         capture.set(CV_CAP_PROP_FRAME_HEIGHT, frameHeight);
 
         capture >> frame;
-        objectFinder.findMostFrequentColor(frame);
         for (;;) {
 
             capture >> frame;
@@ -58,16 +57,10 @@ void SmartPool::init() {
 void SmartPool::processAndDisplay() {
 
 
-    Mat segmentedFrame = objectFinder.segmentTable(frame);
-
-    vector<Vec3f> circles = objectFinder.getCircles(segmentedFrame);
-    vector<Vec3f> whiteBall = objectFinder.findWhiteBall(frame);
-
-    objectFinder.backgroundSubtract(frame);
-
+	frameProcessor.processFrame(frame);
     //show
-    mainWindow.showWindow(frame,circles,whiteBall);
-    projectionWindow.showWindow(circles);
+    //mainWindow.showWindow(frame,circles,whiteBall);
+    //projectionWindow.showWindow(circles);
 }
 
 

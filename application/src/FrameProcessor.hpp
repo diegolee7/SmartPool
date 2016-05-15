@@ -1,5 +1,5 @@
-#ifndef OBJECTFINDER_H
-#define OBJECTFINDER_H
+#ifndef FRAMEPROCESSOR_HPP
+#define FRAMEPROCESSOR_HPP
 
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
@@ -9,7 +9,7 @@
 using namespace std;
 using namespace cv;
 
-class ObjectFinder {
+class FrameProcessor {
 
 private:
 
@@ -42,15 +42,15 @@ private:
     int minHue;
     int maxHue;
 
+    void findMostFrequentColor (Mat frame);
     void updateControlVariables();
+    Mat segmentTable (Mat frame);
+    vector<Vec3f> findAllBalls(Mat frame);
+    vector<Vec3f> findWhiteBall(Mat frame);
+    Mat backgroundSubtract(Mat frame);
 
 public:
-    ObjectFinder();
-    vector<Vec3f> getCircles(Mat frame);
-    void findMostFrequentColor (Mat frame) ;
-    Mat segmentTable (Mat frame);
-    vector<Vec3f> findWhiteBall(Mat frame);
-    void backgroundSubtract(Mat frame);
+    FrameProcessor();
     void processFrame(Mat frame);
 };
 

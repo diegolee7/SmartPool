@@ -74,6 +74,7 @@ private:
 
     void initControlWindow();
 
+
 };
 
 #endif /* CONTROLWINDOW_HPP_ */

@@ -6,6 +6,7 @@
  */
 
 #include "ControlWindow.hpp"
+#include <iostream>
 
 ControlWindow::ControlWindow() {
 	initControlWindow();
@@ -26,19 +27,27 @@ const string ControlWindow::maxCircleSizeTrackbarName = "Maximum Radius Size";
 const string ControlWindow::minCircleSizeTrackbarName = "Minimum Radius Size";
 const string ControlWindow::distanceBetweenCircleCentersTrackbarName = "Distance Between centers";
 
-
 void ControlWindow::initControlWindow(){
     // create the main window
     namedWindow(controlWindowName, WINDOW_AUTOSIZE);
 
-    // initialize parameters that are subjects to change
+    // initialize HoughCircles trackbars
     cannyThreshold = cannyThresholdInitialValue;
     accumulatorThreshold = accumulatorThresholdInitialValue;
     minCircleSize = minCircleSizeInitialValue;
     maxCircleSize = maxCircleSizeInitialValue;
     distanceBetweenCircleCenters = distanceBetweensCentersInitialValue;
+    dp = 100;
 
-    // Attach the trackbars
+    //initialize inRange threshold trackbars
+    minHue = 60;
+    maxHue = 98;
+    minSaturation = 66;
+    maxSaturation = 158;
+    minValue = 30;
+    maxValue = 220;
+
+    // Attach HoughCircles trackbars
     createTrackbar(cannyThresholdTrackbarName, controlWindowName, &cannyThreshold, maxCannyThreshold);
     createTrackbar(accumulatorThresholdTrackbarName, controlWindowName, &accumulatorThreshold,
                    maxAccumulatorThreshold);
@@ -46,17 +55,9 @@ void ControlWindow::initControlWindow(){
     createTrackbar(maxCircleSizeTrackbarName, controlWindowName, &maxCircleSize, maxMaxCircleSize);
     createTrackbar(distanceBetweenCircleCentersTrackbarName, controlWindowName,
                    &distanceBetweenCircleCenters, maxDistanceBetweenCircleCenters);
-
-    dp = 100;
     createTrackbar("dp", controlWindowName, &dp, 500);
 
-    //threshold trackbars
-    minHue = 60;
-    maxHue = 98;
-    minSaturation = 66;
-    maxSaturation = 158;
-    minValue = 30;
-    maxValue = 220;
+    // Attach inRange trackbars
     createTrackbar("minHue", controlWindowName, &minHue, 180);
     createTrackbar("maxHue", controlWindowName, &maxHue, 180);
     createTrackbar("minSaturation", controlWindowName, &minSaturation, 255);
@@ -64,7 +65,6 @@ void ControlWindow::initControlWindow(){
     createTrackbar("minValue", controlWindowName, &minValue, 255);
     createTrackbar("maxValue", controlWindowName, &maxValue, 255);
 }
-
 
 int ControlWindow::getAccumulatorThreshold() {
 	max(accumulatorThreshold, 1);
