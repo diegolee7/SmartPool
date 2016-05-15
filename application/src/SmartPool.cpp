@@ -21,8 +21,9 @@ void SmartPool::init() {
 
     // Read the video stream
     VideoCapture capture;
-    capture.open(homedir.append(videoPathAfterHomeDir).append(videoName));
-    //capture.open(cameraDevice);
+    //capture.open(homedir.append(videoPathAfterHomeDir).append(videoName));
+    capture.open(cameraDevice);
+    //capture.open("/home/diego/workspace/SmartPool/Video_001.avi");
 
     if (capture.isOpened()) {
         capture.set(CV_CAP_PROP_FRAME_WIDTH, frameWidth);
@@ -59,10 +60,12 @@ void SmartPool::processAndDisplay() {
 
 	frameProcessor.processFrame(frame);
     //show
-    //mainWindow.showWindow(frame,circles,whiteBall);
-    //projectionWindow.showWindow(circles);
-}
+	vector<Vec3f> allBalls = frameProcessor.getAllBalls();
+	vector<Vec3f> whiteBalls = frameProcessor.getWhiteBalls();
 
+    mainWindow.showWindow(frame,allBalls,whiteBalls);
+    projectionWindow.showWindow(allBalls);
+}
 
 int main() {
     SmartPool smartPool;

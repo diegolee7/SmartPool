@@ -45,8 +45,8 @@ private:
     // initial values of the parameters of interests.
     static const int cannyThresholdInitialValue = 36;
     static const int accumulatorThresholdInitialValue = 17;
-    static const int minCircleSizeInitialValue = 27;
-    static const int maxCircleSizeInitialValue = 27;
+    static const int minCircleSizeInitialValue = 15;
+    static const int maxCircleSizeInitialValue = 15;
     static const int distanceBetweensCentersInitialValue = 45;
 
     // max values of the parameters of interests.

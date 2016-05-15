@@ -42,6 +42,9 @@ private:
     int minHue;
     int maxHue;
 
+    vector<Vec3f> allBalls;
+    vector<Vec3f> whiteBall;
+
     void findMostFrequentColor (Mat frame);
     void updateControlVariables();
     Mat segmentTable (Mat frame);
@@ -52,6 +55,8 @@ private:
 public:
     FrameProcessor();
     void processFrame(Mat frame);
+    vector<Vec3f> getWhiteBalls();
+    vector<Vec3f> getAllBalls();
 };
 
 #endif // OBJECTFINDER_H

@@ -13,6 +13,7 @@ private:
     static const int frameWidth = 1280;
     static const int frameHeight = 720;
     static const string windowProjectionName;
+    static const string windowControlName;
     Mat frame;
 
 public:
@@ -21,6 +22,9 @@ public:
     void drawCircles(vector<Vec3f> circles);
     void showWindow(vector<Vec3f> circles);
     void clearFrame();
+    void drawBoard();
+    Point boardUpperLeft;
+    Point boardBottomRight;
 };
 
 #endif // PROJECTIONWINDOW_H

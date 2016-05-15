@@ -5,7 +5,6 @@
 
 FrameProcessor::FrameProcessor() {
 
-    namedWindow("Histogram", WINDOW_AUTOSIZE );
     showBalls = false;
     pMOG= new BackgroundSubtractorMOG(); //MOG approach
     pMOG2 = new BackgroundSubtractorMOG2(); //MOG2 approach
@@ -36,11 +35,10 @@ void FrameProcessor::updateControlVariables(){
 void FrameProcessor::processFrame(Mat frame){
 	//findMostFrequentColor(frame);
 	updateControlVariables();
-	Mat subtractedFrame = backgroundSubtract(frame);
-	//segmentTable(frame);
-	findAllBalls(subtractedFrame);
-	//findWhiteBall(frame);
-
+	//Mat subtractedFrame = backgroundSubtract(frame);
+	Mat segmentedFrame = segmentTable(frame);
+	allBalls = findAllBalls(segmentedFrame);
+	whiteBall = findWhiteBall(frame);
 
 }
 
@@ -58,8 +56,8 @@ Mat FrameProcessor::backgroundSubtract(Mat frame) {
 	//putText(frame, frameNumberString.c_str(), cv::Point(15, 15),
 		//FONT_HERSHEY_SIMPLEX, 0.5 , cv::Scalar(0,0,0));
 
-	//show the current frame and the fg masks
-	//imshow("Frame", frame);
+	//Show the FG masks
+	imshow("original", frame);
 	imshow("FG Mask MOG", fgMaskMOG);
 	imshow("FG Mask MOG 2", fgMaskMOG2);
 	return fgMaskMOG;
@@ -259,6 +257,13 @@ void FrameProcessor::findMostFrequentColor (Mat frame) {
     imshow("Histogram", histImage );
 }
 
+vector<Vec3f> FrameProcessor::getAllBalls() {
+	return allBalls;
+}
+
+vector<Vec3f> FrameProcessor::getWhiteBalls() {
+	return whiteBall;
+}
 
 
 
