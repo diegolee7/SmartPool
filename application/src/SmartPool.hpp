@@ -36,7 +36,7 @@ private:
 public:
     SmartPool();
     void init();
-    void detectAndDisplay();
+    void processAndDisplay();
 
 };
 

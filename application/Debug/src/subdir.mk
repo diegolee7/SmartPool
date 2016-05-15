@@ -4,18 +4,21 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../src/ControlWindow.cpp \
 ../src/MainWindow.cpp \
 ../src/ObjectFinder.cpp \
 ../src/ProjectionWindow.cpp \
 ../src/SmartPool.cpp 
 
 OBJS += \
+./src/ControlWindow.o \
 ./src/MainWindow.o \
 ./src/ObjectFinder.o \
 ./src/ProjectionWindow.o \
 ./src/SmartPool.o 
 
 CPP_DEPS += \
+./src/ControlWindow.d \
 ./src/MainWindow.d \
 ./src/ObjectFinder.d \
 ./src/ProjectionWindow.d \

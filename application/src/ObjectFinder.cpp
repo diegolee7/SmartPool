@@ -3,72 +3,40 @@
 #include <iostream>
 
 
-//Window Names
-const string ObjectFinder::controlWindowName = "Control";
-
-//TrackBar Names
-const string ObjectFinder::cannyThresholdTrackbarName = "Canny threshold";
-const string ObjectFinder::accumulatorThresholdTrackbarName = "Accumulator Threshold";
-const string ObjectFinder::maxCircleSizeTrackbarName = "Maximum Radius Size";
-const string ObjectFinder::minCircleSizeTrackbarName = "Minimum Radius Size";
-const string ObjectFinder::distanceBetweenCircleCentersTrackbarName = "Distance Between centers";
-
-
 ObjectFinder::ObjectFinder() {
-    initControlWindow();
+
     namedWindow("Histogram", WINDOW_AUTOSIZE );
     showBalls = false;
     pMOG= new BackgroundSubtractorMOG(); //MOG approach
     pMOG2 = new BackgroundSubtractorMOG2(); //MOG2 approach
+    maxRed = 0;
+    maxBlue = 0;
+    maxGreen = 0;
+    updateControlVariables();
 }
 
-void ObjectFinder::initControlWindow(){
-    // create the main window
-    namedWindow(controlWindowName, WINDOW_AUTOSIZE);
+void ObjectFinder::updateControlVariables(){
+	// Hough Circles Variables
+    cannyThreshold = controlWindow.getCannyThreshold();
+    accumulatorThreshold = controlWindow.getAccumulatorThreshold();
+    distanceBetweenCircleCenters = controlWindow.getDistanceBetweenCircleCenters();
+    minCircleSize = controlWindow.getMinCircleSize();
+    maxCircleSize = controlWindow.getMaxCircleSize();
+    dp = controlWindow.getDp();
 
-    // initialize parameters that are subjects to change
-    cannyThreshold = cannyThresholdInitialValue;
-    accumulatorThreshold = accumulatorThresholdInitialValue;
-    minCircleSize = minCircleSizeInitialValue;
-    maxCircleSize = maxCircleSizeInitialValue;
-    distanceBetweenCircleCenters = distanceBetweensCentersInitialValue;
-
-    // Attach the trackbars
-    createTrackbar(cannyThresholdTrackbarName, controlWindowName, &cannyThreshold, maxCannyThreshold);
-    createTrackbar(accumulatorThresholdTrackbarName, controlWindowName, &accumulatorThreshold,
-                   maxAccumulatorThreshold);
-    createTrackbar(minCircleSizeTrackbarName, controlWindowName, &minCircleSize, maxMinCircleSize);
-    createTrackbar(maxCircleSizeTrackbarName, controlWindowName, &maxCircleSize, maxMaxCircleSize);
-    createTrackbar(distanceBetweenCircleCentersTrackbarName, controlWindowName,
-                   &distanceBetweenCircleCenters, maxDistanceBetweenCircleCenters);
-
-    dp = 100;
-    createTrackbar("dp", controlWindowName, &dp, 500);
-
-    //threshold trackbars
-    minHue = 60;
-    maxHue = 98;
-    minSaturation = 66;
-    maxSaturation = 158;
-    minValue = 30;
-    maxValue = 220;
-    createTrackbar("minHue", controlWindowName, &minHue, 180);
-    createTrackbar("maxHue", controlWindowName, &maxHue, 180);
-    createTrackbar("minSaturation", controlWindowName, &minSaturation, 255);
-    createTrackbar("maxSaturation", controlWindowName, &maxSaturation, 255);
-    createTrackbar("minValue", controlWindowName, &minValue, 255);
-    createTrackbar("maxValue", controlWindowName, &maxValue, 255);
-
-
+    // inRange Parameters
+    minSaturation = controlWindow.getMinSaturation();
+    maxSaturation = controlWindow.getMaxSaturation();
+    minValue = controlWindow.getMinValue();
+    maxValue = controlWindow.getMaxValue();
+    minHue = controlWindow.getMinHue();
+    maxHue = controlWindow.getMaxHue();
 }
+
+
 
  vector<Vec3f> ObjectFinder::getCircles(Mat frame) {
-    // those parameters cannot be =0
-    // so we must check here
-    cannyThreshold = std::max(cannyThreshold, 1);
-    accumulatorThreshold = std::max(accumulatorThreshold, 1);
-    distanceBetweenCircleCenters = std::max(distanceBetweenCircleCenters, 1);
-
+	 updateControlVariables();
     // Convert it to gray
     cvtColor(frame, frameGray, CV_BGR2GRAY);
 
@@ -97,7 +65,7 @@ void ObjectFinder::initControlWindow(){
 
 
 Mat ObjectFinder::segmentTable (Mat frame){
-
+	updateControlVariables();
     //the commented part can be used later for auto finding table color
     /*
     //cout << "\nmax blue: "<<maxBlue;
@@ -152,6 +120,7 @@ Mat ObjectFinder::segmentTable (Mat frame){
 }
 
 vector<Vec3f> ObjectFinder::findWhiteBall(Mat frame){
+	updateControlVariables();
     Mat frameThresholded;
     Mat frameHSV;
     //vtColor(frame, frameHSV, COLOR_BGR2HSV);
@@ -182,10 +151,6 @@ vector<Vec3f> ObjectFinder::findWhiteBall(Mat frame){
 
     return circles;
 }
-
-
-
-
 
 
 void ObjectFinder::findMostFrequentColor (Mat frame) {
@@ -264,8 +229,6 @@ void ObjectFinder::findMostFrequentColor (Mat frame) {
 
 void ObjectFinder::backgroundSubtract(Mat frame) {
 
-
-
 	//update the background model
 	pMOG->operator()(frame, fgMaskMOG);
 	pMOG2->operator()(frame, fgMaskMOG2);
@@ -285,6 +248,10 @@ void ObjectFinder::backgroundSubtract(Mat frame) {
 
 }
 
+void ObjectFinder::processFrame(Mat frame){
+	updateControlVariables();
+	getCircles(frame);
+}
 
 
 

@@ -36,7 +36,7 @@ void SmartPool::init() {
 
             // Apply the classifier to the frame
             if (!frame.empty()) {
-                detectAndDisplay();
+            	processAndDisplay();
             } else {
                 printf(" --(!) No captured frame -- Break!");
                 break;
@@ -55,7 +55,7 @@ void SmartPool::init() {
     return;
 }
 
-void SmartPool::detectAndDisplay() {
+void SmartPool::processAndDisplay() {
 
 
     Mat segmentedFrame = objectFinder.segmentTable(frame);
