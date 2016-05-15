@@ -1,4 +1,5 @@
-#include "MainWindow.h"
+#include "MainWindow.hpp"
+
 #include <iostream>
 #define _USE_MATH_DEFINES
 #include <cmath>

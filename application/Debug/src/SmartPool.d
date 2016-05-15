@@ -1,10 +1,11 @@
-src/SmartPool.o: ../src/SmartPool.cpp ../src/SmartPool.h \
- ../src/ProjectionWindow.h ../src/ObjectFinder.h ../src/MainWindow.h
+src/SmartPool.o: ../src/SmartPool.cpp ../src/SmartPool.hpp \
+ ../src/MainWindow.hpp ../src/ObjectFinder.hpp \
+ ../src/ProjectionWindow.hpp
 
-../src/SmartPool.h:
+../src/SmartPool.hpp:
 
-../src/ProjectionWindow.h:
+../src/MainWindow.hpp:
 
-../src/ObjectFinder.h:
+../src/ObjectFinder.hpp:
 
-../src/MainWindow.h:
+../src/ProjectionWindow.hpp:

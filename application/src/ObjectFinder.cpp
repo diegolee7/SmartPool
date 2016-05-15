@@ -1,8 +1,10 @@
-#include "ObjectFinder.h"
+#include "ObjectFinder.hpp"
+
 #include <iostream>
 
+
 //Window Names
-const string ObjectFinder::windowName = "Control";
+const string ObjectFinder::controlWindowName = "Control";
 
 //TrackBar Names
 const string ObjectFinder::cannyThresholdTrackbarName = "Canny threshold";
@@ -16,11 +18,13 @@ ObjectFinder::ObjectFinder() {
     initControlWindow();
     namedWindow("Histogram", WINDOW_AUTOSIZE );
     showBalls = false;
+    pMOG= new BackgroundSubtractorMOG(); //MOG approach
+    pMOG2 = new BackgroundSubtractorMOG2(); //MOG2 approach
 }
 
 void ObjectFinder::initControlWindow(){
     // create the main window
-    namedWindow(windowName, WINDOW_AUTOSIZE);
+    namedWindow(controlWindowName, WINDOW_AUTOSIZE);
 
     // initialize parameters that are subjects to change
     cannyThreshold = cannyThresholdInitialValue;
@@ -30,36 +34,36 @@ void ObjectFinder::initControlWindow(){
     distanceBetweenCircleCenters = distanceBetweensCentersInitialValue;
 
     // Attach the trackbars
-    createTrackbar(cannyThresholdTrackbarName, windowName, &cannyThreshold, maxCannyThreshold);
-    createTrackbar(accumulatorThresholdTrackbarName, windowName, &accumulatorThreshold,
+    createTrackbar(cannyThresholdTrackbarName, controlWindowName, &cannyThreshold, maxCannyThreshold);
+    createTrackbar(accumulatorThresholdTrackbarName, controlWindowName, &accumulatorThreshold,
                    maxAccumulatorThreshold);
-    createTrackbar(minCircleSizeTrackbarName, windowName, &minCircleSize, maxMinCircleSize);
-    createTrackbar(maxCircleSizeTrackbarName, windowName, &maxCircleSize, maxMaxCircleSize);
-    createTrackbar(distanceBetweenCircleCentersTrackbarName, windowName,
+    createTrackbar(minCircleSizeTrackbarName, controlWindowName, &minCircleSize, maxMinCircleSize);
+    createTrackbar(maxCircleSizeTrackbarName, controlWindowName, &maxCircleSize, maxMaxCircleSize);
+    createTrackbar(distanceBetweenCircleCentersTrackbarName, controlWindowName,
                    &distanceBetweenCircleCenters, maxDistanceBetweenCircleCenters);
 
     dp = 100;
-    createTrackbar("dp", windowName, &dp, 500);
+    createTrackbar("dp", controlWindowName, &dp, 500);
 
-    //threshold tackbars
+    //threshold trackbars
     minHue = 60;
     maxHue = 98;
     minSaturation = 66;
     maxSaturation = 158;
     minValue = 30;
     maxValue = 220;
-    createTrackbar("minHue", windowName, &minHue, 180);
-    createTrackbar("maxHue", windowName, &maxHue, 180);
-    createTrackbar("minSaturation", windowName, &minSaturation, 255);
-    createTrackbar("maxSaturation", windowName, &maxSaturation, 255);
-    createTrackbar("minValue", windowName, &minValue, 255);
-    createTrackbar("maxValue", windowName, &maxValue, 255);
+    createTrackbar("minHue", controlWindowName, &minHue, 180);
+    createTrackbar("maxHue", controlWindowName, &maxHue, 180);
+    createTrackbar("minSaturation", controlWindowName, &minSaturation, 255);
+    createTrackbar("maxSaturation", controlWindowName, &maxSaturation, 255);
+    createTrackbar("minValue", controlWindowName, &minValue, 255);
+    createTrackbar("maxValue", controlWindowName, &maxValue, 255);
 
 
 }
 
  vector<Vec3f> ObjectFinder::getCircles(Mat frame) {
-    // those paramaters cannot be =0
+    // those parameters cannot be =0
     // so we must check here
     cannyThreshold = std::max(cannyThreshold, 1);
     accumulatorThreshold = std::max(accumulatorThreshold, 1);
@@ -255,6 +259,30 @@ void ObjectFinder::findMostFrequentColor (Mat frame) {
 
     /// Display
     imshow("Histogram", histImage );
+}
+
+
+void ObjectFinder::backgroundSubtract(Mat frame) {
+
+
+
+	//update the background model
+	pMOG->operator()(frame, fgMaskMOG);
+	pMOG2->operator()(frame, fgMaskMOG2);
+	//get the frame number and write it on the current frame
+	stringstream ss;
+	rectangle(frame, cv::Point(10, 2), cv::Point(100,20),
+		cv::Scalar(255,255,255), -1);
+	//ss << capture.get(CV_CAP_PROP_POS_FRAMES);
+	//string frameNumberString = ss.str();
+	//putText(frame, frameNumberString.c_str(), cv::Point(15, 15),
+		//FONT_HERSHEY_SIMPLEX, 0.5 , cv::Scalar(0,0,0));
+	//show the current frame and the fg masks
+	//imshow("Frame", frame);
+	imshow("FG Mask MOG", fgMaskMOG);
+	imshow("FG Mask MOG 2", fgMaskMOG2);
+
+
 }
 
 

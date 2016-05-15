@@ -1,4 +1,4 @@
-#include "ProjectionWindow.h"
+#include "ProjectionWindow.hpp"
 
 const string ProjectionWindow::windowProjectionName = "Projection";
 

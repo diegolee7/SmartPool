@@ -1,4 +1,5 @@
-#include "SmartPool.h"
+#include "SmartPool.hpp"
+
 #include <iostream>
 #include <stdio.h>
 #include <string>
@@ -47,6 +48,7 @@ void SmartPool::init() {
                 break;
             }
         }
+        capture.release();
     } else {
         printf("Problem Opening Capture \n");
     }
@@ -60,6 +62,8 @@ void SmartPool::detectAndDisplay() {
 
     vector<Vec3f> circles = objectFinder.getCircles(segmentedFrame);
     vector<Vec3f> whiteBall = objectFinder.findWhiteBall(frame);
+
+    objectFinder.backgroundSubtract(frame);
 
     //show
     mainWindow.showWindow(frame,circles,whiteBall);
