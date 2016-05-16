@@ -35,11 +35,30 @@ void FrameProcessor::updateControlVariables(){
 void FrameProcessor::processFrame(Mat frame){
 	//findMostFrequentColor(frame);
 	updateControlVariables();
-	//Mat subtractedFrame = backgroundSubtract(frame);
+	Mat subtractedFrame = backgroundSubtract(frame);
+	//cout << "\nFrame segment";
 	Mat segmentedFrame = segmentTable(frame);
+	//cout << "\nFind all balls";
 	allBalls = findAllBalls(segmentedFrame);
+	//cout << "\nFind white ball";
 	whiteBall = findWhiteBall(frame);
+	//cout << "\nFind lines";
+	findLines(subtractedFrame);
+}
 
+void FrameProcessor::findLines(Mat frame) {
+	Mat dst, color_dst;
+	vector<Vec4i> lines;
+	Canny( frame, dst, 50, 200, 3 );
+	cvtColor( dst, color_dst, CV_GRAY2BGR );
+	HoughLinesP( dst, lines, 1, CV_PI/180, 80, 30, 10 );
+	for( size_t i = 0; i < lines.size(); i++ )
+	{
+		line( color_dst, Point(lines[i][0], lines[i][1]),
+			Point(lines[i][2], lines[i][3]), Scalar(0,0,255), 3, 8 );
+	}
+	namedWindow( "Detected Lines", 1 );
+	imshow( "Detected Lines", color_dst );
 }
 
 Mat FrameProcessor::backgroundSubtract(Mat frame) {
@@ -56,10 +75,9 @@ Mat FrameProcessor::backgroundSubtract(Mat frame) {
 	//putText(frame, frameNumberString.c_str(), cv::Point(15, 15),
 		//FONT_HERSHEY_SIMPLEX, 0.5 , cv::Scalar(0,0,0));
 
-	//Show the FG masks
-	imshow("original", frame);
-	imshow("FG Mask MOG", fgMaskMOG);
-	imshow("FG Mask MOG 2", fgMaskMOG2);
+	//Show the FG masks;
+	//imshow("FG Mask MOG", fgMaskMOG);
+	//imshow("FG Mask MOG 2", fgMaskMOG2);
 	return fgMaskMOG;
 }
 

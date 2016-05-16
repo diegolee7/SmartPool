@@ -26,6 +26,7 @@ public:
     void setMouseCoordinates(int x, int y);
     Point boardUpperLeft;
     Point boardBottomRight;
+    Rect getTableRectangle();
 };
 
 #endif // MAINWINDOW_H

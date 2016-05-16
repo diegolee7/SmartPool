@@ -57,6 +57,7 @@ public:
     void processFrame(Mat frame);
     vector<Vec3f> getWhiteBalls();
     vector<Vec3f> getAllBalls();
+    void findLines(Mat frame);
 };
 
 #endif // OBJECTFINDER_H

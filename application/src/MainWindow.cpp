@@ -41,6 +41,9 @@ MainWindow::MainWindow() {
     boardUpperLeft.y = 135;
     boardBottomRight.x = 894;
     boardBottomRight.y = 452;
+    whiteBallX = 0;
+    whiteBallY = 0;
+    whiteBallRadius = 0;
 
 }
 
@@ -82,6 +85,10 @@ void MainWindow::showWindow (Mat frame, vector<Vec3f> circles, vector<Vec3f> whi
     //tableRectangle.in
 
     imshow(windowName, frame);
+}
+
+Rect MainWindow::getTableRectangle(){
+	return Rect (boardUpperLeft,boardBottomRight);
 }
 
 void MainWindow::setMouseCoordinates(int x, int y){

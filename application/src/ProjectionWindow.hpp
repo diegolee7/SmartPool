@@ -15,16 +15,25 @@ private:
     static const string windowProjectionName;
     static const string windowControlName;
     Mat frame;
+    Rect tableRectangle;
+    Rect projectionRectangle;
+    vector<Vec3f> transformCoordinates(vector<Vec3f> circlesPointer);
+    vector<Vec3f> allBalls;
+    vector<Vec3f> whiteBalls;
 
 public:
     ProjectionWindow();
     void createProjectionWindow();
-    void drawCircles(vector<Vec3f> circles);
-    void showWindow(vector<Vec3f> circles);
+    void drawAllBalls();
+    void showWindow();
     void clearFrame();
     void drawBoard();
     Point boardUpperLeft;
     Point boardBottomRight;
+    void setTableRectangle(Rect tableRectangle);
+    void setAllBalls ( vector<Vec3f> allBalls);
+    void setWhiteBalls ( vector<Vec3f> whiteBalls);
+
 };
 
 #endif // PROJECTIONWINDOW_H

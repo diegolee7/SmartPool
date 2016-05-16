@@ -30,7 +30,6 @@ public:
 	int getMinSaturation();
 	int getMinValue();
 
-
 private:
     // window name
     static const string controlWindowName;
@@ -44,8 +43,8 @@ private:
 
     // initial values of the parameters of interests.
     static const int cannyThresholdInitialValue = 36;
-    static const int accumulatorThresholdInitialValue = 17;
-    static const int minCircleSizeInitialValue = 15;
+    static const int accumulatorThresholdInitialValue = 14;
+    static const int minCircleSizeInitialValue = 13;
     static const int maxCircleSizeInitialValue = 15;
     static const int distanceBetweensCentersInitialValue = 45;
 
