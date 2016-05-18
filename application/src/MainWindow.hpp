@@ -27,6 +27,8 @@ public:
     Point boardUpperLeft;
     Point boardBottomRight;
     Rect getTableRectangle();
+    int getMouseX();
+    int getMouseY();
 };
 
 #endif // MAINWINDOW_H

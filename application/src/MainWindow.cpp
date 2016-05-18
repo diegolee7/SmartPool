@@ -95,3 +95,11 @@ void MainWindow::setMouseCoordinates(int x, int y){
     mouseX = x;
     mouseY = y;
 }
+
+int MainWindow::getMouseX(){
+	return mouseX;
+}
+
+int MainWindow::getMouseY(){
+	return mouseY;
+}

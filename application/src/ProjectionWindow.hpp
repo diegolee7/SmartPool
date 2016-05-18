@@ -20,6 +20,10 @@ private:
     vector<Vec3f> transformCoordinates(vector<Vec3f> circlesPointer);
     vector<Vec3f> allBalls;
     vector<Vec3f> whiteBalls;
+    int mouseX;
+	int mouseY;
+	double yProportion;
+	double xProportion;
 
 public:
     ProjectionWindow();
@@ -33,7 +37,8 @@ public:
     void setTableRectangle(Rect tableRectangle);
     void setAllBalls ( vector<Vec3f> allBalls);
     void setWhiteBalls ( vector<Vec3f> whiteBalls);
-
+    void setMousePosition(int mouseX, int mouseY);
+    void drawTrajectory();
 };
 
 #endif // PROJECTIONWINDOW_H

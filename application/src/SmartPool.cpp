@@ -22,8 +22,9 @@ void SmartPool::init() {
     // Read the video stream
     VideoCapture capture;
     //capture.open(homedir.append(videoPathAfterHomeDir).append(videoName));
-    capture.open(cameraDevice);
+    //capture.open(cameraDevice);
     //capture.open("/home/diego/workspace/SmartPool/Video_001.avi");
+    capture.open(homedir.append(videoPathAfterHomeDir).append("SmartPool_ap.ogv"));
 
     if (capture.isOpened()) {
         capture.set(CV_CAP_PROP_FRAME_WIDTH, frameWidth);
@@ -69,6 +70,7 @@ void SmartPool::processAndDisplay() {
     projectionWindow.setTableRectangle(tableRectangle);
     projectionWindow.setAllBalls(allBalls);
     projectionWindow.setWhiteBalls(whiteBalls);
+    projectionWindow.setMousePosition(mainWindow.getMouseX(),mainWindow.getMouseY());
     projectionWindow.showWindow();
 }
 
