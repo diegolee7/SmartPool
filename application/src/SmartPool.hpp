@@ -1,8 +1,9 @@
 #ifndef SMARTPOOL_H
 #define SMARTPOOL_H
 
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/highgui.hpp"
+#include "opencv2/imgproc.hpp"
+#include "opencv2/videoio.hpp"
 
 #include "FrameProcessor.hpp"
 #include "MainWindow.hpp"

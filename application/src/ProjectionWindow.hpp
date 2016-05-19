@@ -1,8 +1,8 @@
 #ifndef PROJECTIONWINDOW_H
 #define PROJECTIONWINDOW_H
 
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/highgui.hpp"
+#include "opencv2/imgproc.hpp"
 
 using namespace std;
 using namespace cv;

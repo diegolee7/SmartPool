@@ -6,8 +6,8 @@
 FrameProcessor::FrameProcessor() {
 
     showBalls = false;
-    pMOG= new BackgroundSubtractorMOG(); //MOG approach
-    pMOG2 = new BackgroundSubtractorMOG2(); //MOG2 approach
+    Ptr<BackgroundSubtractor> pMOG; //MOG approach
+    Ptr<BackgroundSubtractor> pMOG2; //MOG2 approach
     maxRed = 0;
     maxBlue = 0;
     maxGreen = 0;
@@ -63,8 +63,8 @@ void FrameProcessor::findLines(Mat frame) {
 
 Mat FrameProcessor::backgroundSubtract(Mat frame) {
 	//update the background model
-	pMOG->operator()(frame, fgMaskMOG);
-	pMOG2->operator()(frame, fgMaskMOG2);
+	pMOG->apply(frame, fgMaskMOG);
+	pMOG2->apply(frame, fgMaskMOG2);
 
 	//get the frame number and write it on the current frame
 	//stringstream ss;
