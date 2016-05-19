@@ -6,8 +6,8 @@
 FrameProcessor::FrameProcessor() {
 
     showBalls = false;
-    Ptr<BackgroundSubtractor> pMOG; //MOG approach
     Ptr<BackgroundSubtractor> pMOG2; //MOG2 approach
+    pMOG2 = createBackgroundSubtractorMOG2();
     maxRed = 0;
     maxBlue = 0;
     maxGreen = 0;
@@ -35,7 +35,7 @@ void FrameProcessor::updateControlVariables(){
 void FrameProcessor::processFrame(Mat frame){
 	//findMostFrequentColor(frame);
 	updateControlVariables();
-	Mat subtractedFrame = backgroundSubtract(frame);
+	//Mat subtractedFrame = backgroundSubtract(frame);
 	//cout << "\nFrame segment";
 	Mat segmentedFrame = segmentTable(frame);
 	//cout << "\nFind all balls";
@@ -43,7 +43,7 @@ void FrameProcessor::processFrame(Mat frame){
 	//cout << "\nFind white ball";
 	whiteBall = findWhiteBall(frame);
 	//cout << "\nFind lines";
-	findLines(subtractedFrame);
+	findLines(segmentedFrame);
 }
 
 void FrameProcessor::findLines(Mat frame) {
@@ -63,7 +63,6 @@ void FrameProcessor::findLines(Mat frame) {
 
 Mat FrameProcessor::backgroundSubtract(Mat frame) {
 	//update the background model
-	pMOG->apply(frame, fgMaskMOG);
 	pMOG2->apply(frame, fgMaskMOG2);
 
 	//get the frame number and write it on the current frame
@@ -78,7 +77,7 @@ Mat FrameProcessor::backgroundSubtract(Mat frame) {
 	//Show the FG masks;
 	//imshow("FG Mask MOG", fgMaskMOG);
 	//imshow("FG Mask MOG 2", fgMaskMOG2);
-	return fgMaskMOG;
+	return fgMaskMOG2;
 }
 
 

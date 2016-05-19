@@ -1,7 +1,6 @@
 #ifndef FRAMEPROCESSOR_HPP
 #define FRAMEPROCESSOR_HPP
 
-#include <opencv2/video/background_segm.hpp>
 #include "ControlWindow.hpp"
 
 #include "opencv2/imgcodecs.hpp"

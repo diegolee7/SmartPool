@@ -7,7 +7,8 @@
 
 //Video Path and Name
 const string SmartPool::videoPathAfterHomeDir = "/Dropbox/Oficinas de Integração 3/images_videos/";
-const string SmartPool::videoName = "smartPoolTest-2.ogv";
+//const string SmartPool::videoName = "smartPoolTest-2.ogv";
+const string SmartPool::videoName = "SmartPool_ap.ogv";
 
 SmartPool::SmartPool(){
     drawTableBoard = false;
@@ -21,10 +22,10 @@ void SmartPool::init() {
 
     // Read the video stream
     VideoCapture capture;
-    //capture.open(homedir.append(videoPathAfterHomeDir).append(videoName));
+    capture.open(homedir.append(videoPathAfterHomeDir).append(videoName));
     //capture.open(cameraDevice);
-    //capture.open("/home/diego/workspace/SmartPool/Video_001.avi");
-    capture.open(homedir.append(videoPathAfterHomeDir).append("SmartPool_ap.ogv"));
+    //capture.open("/Dropbox/Oficinas de Integração 3/images_videos/SmartPool_ap.ogv");
+    //capture.open(homedir.append(videoPathAfterHomeDir).append("SmartPool_ap.ogv"));
 
     if (capture.isOpened()) {
         capture.set(CV_CAP_PROP_FRAME_WIDTH, frameWidth);
