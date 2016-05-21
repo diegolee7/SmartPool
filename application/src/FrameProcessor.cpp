@@ -39,14 +39,14 @@ void FrameProcessor::processFrame(Mat frame){
 	//Mat subtractedFrame = backgroundSubtract(frame);
 
 	//cout << "\nFrame segment";
-	Mat segmentedFrame = segmentTable(frame);
+	//Mat segmentedFrame = segmentTable(frame);
 
-	segmentedFrame = applyMedianBlur(segmentedFrame, 1, 3);
-	findCountours(segmentedFrame);
+	//segmentedFrame = applyMedianBlur(segmentedFrame, 1, 3);
+	//findCountours(segmentedFrame);
 	//cout << "\nFind all balls";
 	//allBalls = findAllBalls(segmentedFrame);
 	//cout << "\nFind white ball";
-	//whiteBall = findWhiteBall(frame);
+	whiteBall = findWhiteBall(frame);
 	//cout << "\nFind lines";
 	//findLines(segmentedFrame);
 	findCue(frame);
@@ -101,6 +101,7 @@ void FrameProcessor::findCountours (Mat frame){
 	/// Show in a window
 	namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
 	imshow( "Contours", frame );
+	//return vector<Point2f> mc
 }
 
 Mat FrameProcessor::applyMedianBlur(Mat frame, int iterations, int ksize){
@@ -254,18 +255,22 @@ vector<Vec3f> FrameProcessor::findWhiteBall(Mat frame){
     dilate(frameThresholded, frameThresholded, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)) );
     erode(frameThresholded, frameThresholded, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)) );
 
+    findLines(frameThresholded);
+
     // Reduce the noise so we avoid false circle detection
     GaussianBlur(frameThresholded, frameThresholded, Size(15, 15), 5, 5);
 
     vector<Vec3f> circles;
     HoughCircles(frameThresholded, circles, CV_HOUGH_GRADIENT, (double)dp/100, distanceBetweenCircleCenters , cannyThreshold,
-                 30, minCircleSize, maxCircleSize);
+                 30, 14, 16);
 
     for (size_t i = 0; i < circles.size(); i++) {
         Vec3i c = circles[i];
         cout << "\nWhite ball: (" << c[0] << "," << c[1] << ") radius=" << c[2];
     }
 
+
+    imshow("White Ball", frameThresholded );
     return circles;
 }
 
