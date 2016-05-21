@@ -38,10 +38,12 @@ void ControlWindow::initControlWindow(){
     maxCircleSize = maxCircleSizeInitialValue;
     distanceBetweenCircleCenters = distanceBetweensCentersInitialValue;
     dp = 100;
+    erodeSize = 10;
+    dilateSize = 10;
 
     //initialize inRange threshold trackbars
     minHue = 60;
-    maxHue = 98;
+    maxHue = 90;
     minSaturation = 77;
     maxSaturation = 255;
     minValue = 133;
@@ -56,6 +58,8 @@ void ControlWindow::initControlWindow(){
     createTrackbar(distanceBetweenCircleCentersTrackbarName, controlWindowName,
                    &distanceBetweenCircleCenters, maxDistanceBetweenCircleCenters);
     createTrackbar("dp", controlWindowName, &dp, 500);
+    createTrackbar("erodeSize", controlWindowName, &erodeSize, 10);
+    createTrackbar("dilateSize", controlWindowName, &dilateSize, 10);
 
     // Attach inRange trackbars
     createTrackbar("minHue", controlWindowName, &minHue, 180);
@@ -67,17 +71,17 @@ void ControlWindow::initControlWindow(){
 }
 
 int ControlWindow::getAccumulatorThreshold() {
-	max(accumulatorThreshold, 1);
+	accumulatorThreshold = max(accumulatorThreshold, 1);
 	return accumulatorThreshold;
 }
 
 int ControlWindow::getCannyThreshold() {
-	max(cannyThreshold, 1);
+	cannyThreshold = max(cannyThreshold, 1);
 	return cannyThreshold;
 }
 
 int ControlWindow::getDistanceBetweenCircleCenters() {
-	max(distanceBetweenCircleCenters, 1);
+	distanceBetweenCircleCenters = max(distanceBetweenCircleCenters, 1);
 	return distanceBetweenCircleCenters;
 }
 
@@ -115,4 +119,14 @@ int ControlWindow::getMinSaturation() {
 
 int ControlWindow::getMinValue() {
 	return minValue;
+}
+
+int ControlWindow::getErodeSize() {
+	erodeSize = max(erodeSize, 1);
+	return erodeSize;
+}
+
+int ControlWindow::getDilateSize() {
+	dilateSize = max(dilateSize, 1);
+	return dilateSize;
 }

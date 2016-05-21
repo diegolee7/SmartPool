@@ -6,7 +6,6 @@
 FrameProcessor::FrameProcessor() {
 
     showBalls = false;
-    Ptr<BackgroundSubtractor> pMOG2; //MOG2 approach
     pMOG2 = createBackgroundSubtractorMOG2();
     maxRed = 0;
     maxBlue = 0;
@@ -22,6 +21,8 @@ void FrameProcessor::updateControlVariables(){
     minCircleSize = controlWindow.getMinCircleSize();
     maxCircleSize = controlWindow.getMaxCircleSize();
     dp = controlWindow.getDp();
+    dilateSize = controlWindow.getDilateSize();
+    erodeSize = controlWindow.getErodeSize();
 
     // inRange Parameters
     minSaturation = controlWindow.getMinSaturation();
@@ -36,14 +37,79 @@ void FrameProcessor::processFrame(Mat frame){
 	//findMostFrequentColor(frame);
 	updateControlVariables();
 	//Mat subtractedFrame = backgroundSubtract(frame);
+
 	//cout << "\nFrame segment";
 	Mat segmentedFrame = segmentTable(frame);
+
+	segmentedFrame = applyMedianBlur(segmentedFrame, 1, 3);
+	findCountours(segmentedFrame);
 	//cout << "\nFind all balls";
-	allBalls = findAllBalls(segmentedFrame);
+	//allBalls = findAllBalls(segmentedFrame);
 	//cout << "\nFind white ball";
-	whiteBall = findWhiteBall(frame);
+	//whiteBall = findWhiteBall(frame);
 	//cout << "\nFind lines";
-	findLines(segmentedFrame);
+	//findLines(segmentedFrame);
+}
+
+void FrameProcessor::findCountours (Mat frame){
+	Mat canny_output;
+	vector<vector<Point> > contours;
+	vector<Vec4i> hierarchy;
+	int thresh = 100;
+	RNG rng(12345);
+
+	/// Detect edges using canny
+	Canny( frame, canny_output, thresh, thresh*2, 3 );
+	/// Find contours
+	findContours( canny_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+
+	/// Draw contours
+	/*
+	Mat drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
+	for( int i = 0; i< contours.size(); i++ ) {
+		Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+		drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
+	}*/
+
+	/// Get the moments
+	vector<Moments> mu(contours.size() );
+	for( unsigned int i = 0; i < contours.size(); i++ ) {
+		mu[i] = moments( contours[i], false );
+	}
+
+	///  Get the mass centers:
+	vector<Point2f> mc( contours.size() );
+	for(unsigned int i = 0; i < contours.size(); i++ ) {
+		mc[i] = Point2f( mu[i].m10/mu[i].m00 , mu[i].m01/mu[i].m00 );
+	}
+
+    // Draw Circles on Gray frame with GaussianBlur
+	int j = 0;
+	float contourArea;
+    for (size_t i = 0; i < mc.size(); i++) {
+    	contourArea = mu[i].m00;
+    	if(contourArea > 400 && contourArea < 1200 ){
+			Point2f c = mc[i];
+			circle(frame, c, 16, Scalar(0,0,255), 1, CV_AA);
+			circle(frame, c, 2, Scalar(0,255,0), 1, CV_AA);
+			//ccprintf("\nitem %d size: %.2f",j, mu[i].m00);
+			j++;
+    	}
+    }
+
+	/// Show in a window
+	namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
+	imshow( "Contours", frame );
+}
+
+Mat FrameProcessor::applyMedianBlur(Mat frame, int iterations, int ksize){
+    /// Applying Median blur
+    for ( int i = 1; i < iterations; i ++ ){
+    	medianBlur ( frame, frame, ksize );
+    }
+	namedWindow( "Median Filter", 1 );
+	imshow( "Median Filter", frame );
+    return frame;
 }
 
 void FrameProcessor::findLines(Mat frame) {
@@ -151,8 +217,8 @@ Mat FrameProcessor::segmentTable (Mat frame){
     dilate(frameThresholded, frameThresholded, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)) );
 
     //morphological closing (removes small holes from the foreground)
-    dilate(frameThresholded, frameThresholded, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)) );
-    erode(frameThresholded, frameThresholded, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)) );
+    dilate(frameThresholded, frameThresholded, getStructuringElement(MORPH_ELLIPSE, Size(dilateSize, dilateSize)) );
+    erode(frameThresholded, frameThresholded, getStructuringElement(MORPH_ELLIPSE, Size(erodeSize, erodeSize)) );
 
     cvtColor(frameThresholded, frameThresholded, CV_GRAY2BGR);
 

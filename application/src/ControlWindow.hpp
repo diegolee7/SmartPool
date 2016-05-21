@@ -29,6 +29,8 @@ public:
 	int getMinHue();
 	int getMinSaturation();
 	int getMinValue();
+	int getErodeSize();
+	int getDilateSize();
 
 private:
     // window name
@@ -44,8 +46,8 @@ private:
     // initial values of the parameters of interests.
     static const int cannyThresholdInitialValue = 36;
     static const int accumulatorThresholdInitialValue = 14;
-    static const int minCircleSizeInitialValue = 13;
-    static const int maxCircleSizeInitialValue = 15;
+    static const int minCircleSizeInitialValue = 16;
+    static const int maxCircleSizeInitialValue = 16;
     static const int distanceBetweensCentersInitialValue = 45;
 
     // max values of the parameters of interests.
@@ -70,6 +72,8 @@ private:
     int minHue;
     int maxHue;
     int dp;
+    int erodeSize;
+    int dilateSize;
 
     void initControlWindow();
 
