@@ -47,6 +47,7 @@ private:
 
     vector<Vec3f> allBalls;
     vector<Vec3f> whiteBall;
+    vector<Vec3f> cuePosition;
 
     void findMostFrequentColor (Mat frame);
     void updateControlVariables();
@@ -54,13 +55,14 @@ private:
     vector<Vec3f> findAllBalls(Mat frame);
     vector<Vec3f> findWhiteBall(Mat frame);
     Mat backgroundSubtract(Mat frame);
+    vector<Vec3f> findCue(Mat frame);
 
 public:
     FrameProcessor();
     void processFrame(Mat frame);
     vector<Vec3f> getWhiteBalls();
     vector<Vec3f> getAllBalls();
-    void findLines(Mat frame);
+    vector<Vec4i> findLines(Mat frame);
     Mat applyMedianBlur (Mat frame, int iterations, int ksize);
     void findCountours (Mat frame);
 };

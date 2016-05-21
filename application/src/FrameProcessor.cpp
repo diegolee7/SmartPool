@@ -49,6 +49,7 @@ void FrameProcessor::processFrame(Mat frame){
 	//whiteBall = findWhiteBall(frame);
 	//cout << "\nFind lines";
 	//findLines(segmentedFrame);
+	findCue(frame);
 }
 
 void FrameProcessor::findCountours (Mat frame){
@@ -112,7 +113,7 @@ Mat FrameProcessor::applyMedianBlur(Mat frame, int iterations, int ksize){
     return frame;
 }
 
-void FrameProcessor::findLines(Mat frame) {
+vector<Vec4i> FrameProcessor::findLines(Mat frame) {
 	Mat dst, color_dst;
 	vector<Vec4i> lines;
 	Canny( frame, dst, 50, 200, 3 );
@@ -125,6 +126,7 @@ void FrameProcessor::findLines(Mat frame) {
 	}
 	namedWindow( "Detected Lines", 1 );
 	imshow( "Detected Lines", color_dst );
+	return lines;
 }
 
 Mat FrameProcessor::backgroundSubtract(Mat frame) {
@@ -338,6 +340,30 @@ void FrameProcessor::findMostFrequentColor (Mat frame) {
 
     /// Display
     imshow("Histogram", histImage );
+}
+
+vector<Vec3f> FrameProcessor::findCue(Mat frame){
+    Mat frameThresholded;
+
+    inRange(frame, Scalar(230,230,230)
+           ,Scalar(255, 255, 255), frameThresholded);
+
+    //morphological opening (removes small objects from the foreground)
+    erode(frameThresholded, frameThresholded, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)) );
+    dilate(frameThresholded, frameThresholded, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)) );
+
+    //morphological closing (removes small holes from the foreground)
+    dilate(frameThresholded, frameThresholded, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)) );
+    erode(frameThresholded, frameThresholded, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)) );
+
+    // Reduce the noise so we avoid false circle detection
+    GaussianBlur(frameThresholded, frameThresholded, Size(15, 15), 5, 5);
+    vector<Vec4i> lines = findLines(frameThresholded);
+
+    printf("%d\n", lines.size());
+
+    vector<Vec3f> circles;
+    return circles;
 }
 
 vector<Vec3f> FrameProcessor::getAllBalls() {
