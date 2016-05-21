@@ -37,10 +37,10 @@ MainWindow::MainWindow() {
     setMouseCallback(windowName, CallBackFunc, this);
     mouseX = 0;
     mouseY = 0;
-    boardUpperLeft.x = 326;
-    boardUpperLeft.y = 135;
-    boardBottomRight.x = 894;
-    boardBottomRight.y = 452;
+    boardUpperLeft.x = 308;
+    boardUpperLeft.y = 115;
+    boardBottomRight.x = 902;
+    boardBottomRight.y = 444;
     whiteBallX = 0;
     whiteBallY = 0;
     whiteBallRadius = 0;
