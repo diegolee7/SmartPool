@@ -39,6 +39,8 @@ public:
     void setWhiteBalls ( vector<Vec3f> whiteBalls);
     void setMousePosition(int mouseX, int mouseY);
     void drawTrajectory();
+    bool intersection(Point2f o1, Point2f p1, Point2f o2, Point2f p2,
+                          Point2f &r);
 };
 
 #endif // PROJECTIONWINDOW_H

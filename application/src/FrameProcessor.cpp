@@ -49,7 +49,7 @@ void FrameProcessor::processFrame(Mat frame){
 	whiteBall = findWhiteBall(frame);
 	//cout << "\nFind lines";
 	//findLines(segmentedFrame);
-	findCue(frame);
+	//findCue(frame);
 }
 
 void FrameProcessor::findCountours (Mat frame){
@@ -93,7 +93,7 @@ void FrameProcessor::findCountours (Mat frame){
 			Point2f c = mc[i];
 			circle(frame, c, 16, Scalar(0,0,255), 1, CV_AA);
 			circle(frame, c, 2, Scalar(0,255,0), 1, CV_AA);
-			//ccprintf("\nitem %d size: %.2f",j, mu[i].m00);
+			//printf("\nitem %d size: %.2f",j, mu[i].m00);
 			j++;
     	}
     }
@@ -103,6 +103,8 @@ void FrameProcessor::findCountours (Mat frame){
 	imshow( "Contours", frame );
 	//return vector<Point2f> mc
 }
+
+
 
 Mat FrameProcessor::applyMedianBlur(Mat frame, int iterations, int ksize){
     /// Applying Median blur
@@ -265,8 +267,8 @@ vector<Vec3f> FrameProcessor::findWhiteBall(Mat frame){
                  30, 14, 16);
 
     for (size_t i = 0; i < circles.size(); i++) {
-        Vec3i c = circles[i];
-        cout << "\nWhite ball: (" << c[0] << "," << c[1] << ") radius=" << c[2];
+        //Vec3i c = circles[i];
+        //cout << "\nWhite ball << i <<: (" << c[0] << "," << c[1] << ") radius=" << c[2];
     }
 
 
@@ -365,7 +367,7 @@ vector<Vec3f> FrameProcessor::findCue(Mat frame){
     GaussianBlur(frameThresholded, frameThresholded, Size(15, 15), 5, 5);
     vector<Vec4i> lines = findLines(frameThresholded);
 
-    printf("%d\n", lines.size());
+    cout << lines.size();
 
     vector<Vec3f> circles;
     return circles;

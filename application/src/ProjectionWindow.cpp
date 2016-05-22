@@ -87,7 +87,7 @@ void ProjectionWindow::drawTrajectory(){
 		//std::cout << "\ny: " << c[1] << "\tnew y: " << newX << endl;
     }
 
-    mouseX = mouseX- tableRectangle.x;
+    mouseX = mouseX - tableRectangle.x;
     mouseX = mouseX * xProportion;
     mouseX += projectionRectangle.x;
     //std::cout << "\nx: " << c[0] << "\tnew x: " << newX << endl;
@@ -114,13 +114,61 @@ void ProjectionWindow::drawTrajectory(){
     y2 = y2 * yProportion;
     y2 += projectionRectangle.y;
 
+
+    //line equation: y - y1 = m (x - x1);
+    // m = (y - y1)/ (x - x1)
+    vector<Vec4i> lines;
+	if(x1 - whiteBallX != 0){
+		double slope = double(y1 - whiteBallY)/ (x1 - whiteBallX);
+		cout << "Slope: " << slope << endl;
+		if(x1 < projectionRectangle.x){
+			int y2 = int(slope *(projectionRectangle.x - whiteBallX) + whiteBallY);
+			lines.push_back(Vec4i(whiteBallX,whiteBallY,projectionRectangle.x,y2));
+			int x2 = projectionRectangle.x + projectionRectangle.x - x1;
+			lines.push_back(Vec4i(projectionRectangle.x,y2,x2,y1));
+		} else if (x1 > projectionRectangle.x) {
+			x1 = x1 - x1 - projectionRectangle.x;
+		}
+	}
+
+    /*
+    if(y1 < projectionRectangle.y){
+    	y1 = projectionRectangle.y + projectionRectangle.y - y1;
+    } else if (y1 > projectionRectangle.y) {
+    	y1 = y1 - y1 - projectionRectangle.y;
+    }
+    */
+
     //draw Cue
     //line(img, pt1, pt2, color, thickness=1, lineType=8, shift=0);
 
-    line(frame,Point(whiteBallX,whiteBallY), Point(x1, y1), Scalar(255,255,0), 4, CV_AA, 0 );
+	//Point2f point1
+    for(unsigned int i = 0; i < lines.size(); i++){
+    	Vec4i tempLine = lines[i];
+    	line(frame,Point(tempLine[0],tempLine[1]), Point(tempLine[2], tempLine[3]), Scalar(255,255,0), 4, CV_AA, 0 );
+    	cout << "Drawing trajectory " << i << "(" << tempLine[0] << "," << tempLine[1] << ") "
+    			<< "(" << tempLine[2] << "," << tempLine[3] << ")" << endl ;
+    }
 
     Rect tableRectangle = Rect (boardUpperLeft,boardBottomRight);
     rectangle(frame, tableRectangle, Scalar(255,0,255), 2, 8, 0);
+}
+
+// Finds the intersection of two lines, or returns false.
+// The lines are defined by (o1, p1) and (o2, p2).
+bool ProjectionWindow::intersection(Point2f o1, Point2f p1, Point2f o2, Point2f p2,
+                      Point2f &r){
+    Point2f x = o2 - o1;
+    Point2f d1 = p1 - o1;
+    Point2f d2 = p2 - o2;
+
+    float cross = d1.x*d2.y - d1.y*d2.x;
+    if (abs(cross) < /*EPS*/1e-8)
+        return false;
+
+    double t1 = (x.x * d2.y - x.y * d2.x)/cross;
+    r = o1 + d1 * t1;
+    return true;
 }
 
 void ProjectionWindow::showWindow(){
@@ -149,7 +197,9 @@ void ProjectionWindow::setAllBalls ( vector<Vec3f> allBalls){
 }
 
 void ProjectionWindow::setWhiteBalls ( vector<Vec3f> whiteBalls){
-	this->whiteBalls = whiteBalls;
+	if(whiteBalls.size() > 0){
+		this->whiteBalls = whiteBalls;
+	}
 }
 
 void ProjectionWindow::setMousePosition(int mouseX, int mouseY){
