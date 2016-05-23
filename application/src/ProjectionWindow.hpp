@@ -10,6 +10,13 @@ using namespace cv;
 class ProjectionWindow {
 
 private:
+	struct Table {
+		Point2f p1;
+		Point2f p2;
+		Point2f p3;
+		Point2f p4;
+	} table;
+
     static const int frameWidth = 1280;
     static const int frameHeight = 720;
     static const string windowProjectionName;
