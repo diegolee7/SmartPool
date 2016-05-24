@@ -148,9 +148,17 @@ void ProjectionWindow::drawTrajectory(){
 
 	//prevent for loop forever
 	int maxIterations = 5;
-
+	int hole = 0;
+	Point2f holePoint;
 	for (int i = 0; foundAllCollisions == false && i < maxIterations; i++){
-		if( intersection(table.p1, table.p2,
+		hole = checkHoles(trajectoryStartPoint,trajectoryEndPoint, holePoint);
+		if(hole > -1){
+			trajectoryEndPoint = holePoint;
+			cout << "Hole: " << holePoint << endl;
+			lines.push_back(Vec4i(trajectoryStartPoint.x,trajectoryStartPoint.y,
+					trajectoryEndPoint.x,trajectoryEndPoint.y));
+			foundAllCollisions = true;
+		} else if( intersection(table.p1, table.p2,
 				trajectoryStartPoint,trajectoryEndPoint, intersectionPoint)){
 			lines.push_back(Vec4i(trajectoryStartPoint.x,trajectoryStartPoint.y,
 					intersectionPoint.x,intersectionPoint.y));
@@ -192,18 +200,41 @@ void ProjectionWindow::drawTrajectory(){
 	}
 
 	//draw trajectory without colisions
-	line(frame,trajectoryStartPoint, trajectoryEndPoint, Scalar(255,255,0), 4, CV_AA, 0 );
+	//line(frame,trajectoryStartPoint, trajectoryEndPoint, Scalar(255,255,0), 4, CV_AA, 0 );
 
 	//Point2f point1
     for(unsigned int i = 0; i < lines.size(); i++){
+    	cout << "Lines size: " << lines.size() << endl;
     	Vec4i tempLine = lines[i];
     	line(frame,Point(tempLine[0],tempLine[1]), Point(tempLine[2], tempLine[3]), Scalar(255,255,0), 4, CV_AA, 0 );
     	//cout << "Drawing trajectory " << i << "(" << tempLine[0] << "," << tempLine[1] << ") "
     	//		<< "(" << tempLine[2] << "," << tempLine[3] << ")" << endl ;
     }
 
+    //holes
+    for (int i = 0; i< 6; i++) {
+    	line(frame, holes.h[i][0] , holes.h[i][1], Scalar(255,255,0), 4, CV_AA, 0 );
+    }
+
+    if (hole > -1){
+    	circle(frame, Point((holes.h[hole][0].x + holes.h[hole][1].x)/2 ,
+    			(holes.h[hole][0].y + holes.h[hole][1].y)/2 ),16*4, Scalar(25,180,0), -1, CV_AA);
+    }
+
+
     Rect tableRectangle = Rect (boardUpperLeft,boardBottomRight);
     rectangle(frame, tableRectangle, Scalar(255,0,255), 2, 8, 0);
+}
+
+int ProjectionWindow::checkHoles(Point2f trajectoryStartPoint, Point2f trajectoryEndPoint, Point2f &r){
+	int holePocketed = -1;
+	for(int i = 0; i < 6; i++){
+		if(intersection(trajectoryStartPoint, trajectoryEndPoint , holes.h[i][0] , holes.h[i][1], r)){
+			holePocketed = i;
+			break;
+		}
+	}
+	return holePocketed;
 }
 
 // Finds the intersection of two lines, or returns false.
@@ -257,8 +288,43 @@ void ProjectionWindow::showWindow(){
 	table.p4.x = projectionRectangle.x;
 	table.p4.y = projectionRectangle.y + projectionRectangle.height;
 
+	//hole 1
+	holes.h[0][0].x = projectionRectangle.x + (float)projectionRectangle.width * 0.05;
+	holes.h[0][0].y = projectionRectangle.y;
+	holes.h[0][1].x = projectionRectangle.x;
+	holes.h[0][1].y = projectionRectangle.y + (float)projectionRectangle.height * 0.09;
 
+	//hole 2
+	holes.h[1][0].x = projectionRectangle.x + projectionRectangle.width/2 + (float)projectionRectangle.width * 0.03;
+	holes.h[1][0].y = projectionRectangle.y;
+	holes.h[1][1].x = projectionRectangle.x + projectionRectangle.width/2 - (float)projectionRectangle.width * 0.03;
+	holes.h[1][1].y = projectionRectangle.y;
 
+	//hole 3
+	holes.h[2][0].x = projectionRectangle.x + projectionRectangle.width - (float)projectionRectangle.width * 0.05;
+	holes.h[2][0].y = projectionRectangle.y;
+	holes.h[2][1].x = projectionRectangle.x + projectionRectangle.width;
+	holes.h[2][1].y = projectionRectangle.y + (float)projectionRectangle.height * 0.09;
+
+	//hole 4
+	holes.h[3][0].x = projectionRectangle.x + projectionRectangle.width - (float)projectionRectangle.width * 0.05;
+	holes.h[3][0].y = projectionRectangle.y + projectionRectangle.height;
+	holes.h[3][1].x = projectionRectangle.x + projectionRectangle.width;
+	holes.h[3][1].y = projectionRectangle.y + projectionRectangle.height - (float)projectionRectangle.height * 0.09;
+
+	//hole 5
+	holes.h[4][0].x = projectionRectangle.x + projectionRectangle.width/2 + (float)projectionRectangle.width * 0.03;
+	holes.h[4][0].y = projectionRectangle.y + projectionRectangle.height;
+	holes.h[4][1].x = projectionRectangle.x + projectionRectangle.width/2 - (float)projectionRectangle.width * 0.03;
+	holes.h[4][1].y = projectionRectangle.y + projectionRectangle.height;
+
+	//hole 6
+	holes.h[5][0].x = projectionRectangle.x + (float)projectionRectangle.width * 0.05;
+	holes.h[5][0].y = projectionRectangle.y + projectionRectangle.height;
+	holes.h[5][1].x = projectionRectangle.x;
+	holes.h[5][1].y = projectionRectangle.y + projectionRectangle.height - (float)projectionRectangle.height * 0.09;
+
+	//cout << "h11: " << holes.h11
 
     clearFrame();
     drawBoard();

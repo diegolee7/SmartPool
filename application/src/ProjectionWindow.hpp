@@ -17,6 +17,10 @@ private:
 		Point2f p4;
 	} table;
 
+	struct Holes {
+		Point2f h[6][2];
+	} holes;
+
     static const int frameWidth = 1280;
     static const int frameHeight = 720;
     static const string windowProjectionName;
@@ -48,6 +52,7 @@ public:
     void drawTrajectory();
     bool intersection(Point2f o1, Point2f p1, Point2f o2, Point2f p2,
                           Point2f &r);
+    int checkHoles(Point2f trajectoryStartPoint, Point2f trajectoryEndPoint, Point2f &r);
 };
 
 #endif // PROJECTIONWINDOW_H
