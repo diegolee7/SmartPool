@@ -107,6 +107,9 @@ void ProjectionWindow::drawTrajectory(){
     int x1 = whiteBallX + deltaX;
     int y1 = whiteBallY + deltaY;
 
+    x1 = whiteBallX + 1000*cos(angle);
+    y1 = whiteBallY + 1000*sin(angle);
+
     int x2 = xBorder+whiteBallX;
     x2 = x2 * xProportion;
     x2 += projectionRectangle.x;
@@ -145,6 +148,14 @@ void ProjectionWindow::drawTrajectory(){
 	Point2f trajectoryEndPoint;
 	trajectoryEndPoint.x = x1;
 	trajectoryEndPoint.y = y1;
+
+	Vec3f c;
+	c[0] = 500;
+	c[1] = 200;
+	c[2] = 50;
+	circle(frame, Point(c[0], c[1]),c[2] , Scalar(0,255,0), 3, CV_AA);
+	bool circleLine = circleLineIntersect(trajectoryStartPoint,trajectoryEndPoint,c);
+	cout << "Circle Line: " << circleLine <<endl;
 
 	//prevent for loop forever
 	int maxIterations = 5;
@@ -226,6 +237,19 @@ void ProjectionWindow::drawTrajectory(){
     rectangle(frame, tableRectangle, Scalar(255,0,255), 2, 8, 0);
 }
 
+bool ProjectionWindow::circleLineIntersect(Point2f p1, Point2f p2, Vec3f circle) {
+	float dx = p2.x - p1.x	;
+	float dy = p2.y - p1.y;
+	float dr = sqrt(dx*dx + dy*dy);
+	float D = p1.x*p2.y - p1.y*p2.x;
+	float radius = circle[2];
+	float discriminant = radius*radius*	dr*dr - D*D;
+	if (discriminant > 0){
+		return true;
+	}
+	return false;
+}
+
 int ProjectionWindow::checkHoles(Point2f trajectoryStartPoint, Point2f trajectoryEndPoint, Point2f &r){
 	int holePocketed = -1;
 	for(int i = 0; i < 6; i++){
@@ -295,9 +319,9 @@ void ProjectionWindow::showWindow(){
 	holes.h[0][1].y = projectionRectangle.y + (float)projectionRectangle.height * 0.09;
 
 	//hole 2
-	holes.h[1][0].x = projectionRectangle.x + projectionRectangle.width/2 + (float)projectionRectangle.width * 0.03;
+	holes.h[1][0].x = projectionRectangle.x + projectionRectangle.width/2 + (float)projectionRectangle.width * 0.04;
 	holes.h[1][0].y = projectionRectangle.y;
-	holes.h[1][1].x = projectionRectangle.x + projectionRectangle.width/2 - (float)projectionRectangle.width * 0.03;
+	holes.h[1][1].x = projectionRectangle.x + projectionRectangle.width/2 - (float)projectionRectangle.width * 0.04;
 	holes.h[1][1].y = projectionRectangle.y;
 
 	//hole 3
@@ -313,9 +337,9 @@ void ProjectionWindow::showWindow(){
 	holes.h[3][1].y = projectionRectangle.y + projectionRectangle.height - (float)projectionRectangle.height * 0.09;
 
 	//hole 5
-	holes.h[4][0].x = projectionRectangle.x + projectionRectangle.width/2 + (float)projectionRectangle.width * 0.03;
+	holes.h[4][0].x = projectionRectangle.x + projectionRectangle.width/2 + (float)projectionRectangle.width * 0.04;
 	holes.h[4][0].y = projectionRectangle.y + projectionRectangle.height;
-	holes.h[4][1].x = projectionRectangle.x + projectionRectangle.width/2 - (float)projectionRectangle.width * 0.03;
+	holes.h[4][1].x = projectionRectangle.x + projectionRectangle.width/2 - (float)projectionRectangle.width * 0.04;
 	holes.h[4][1].y = projectionRectangle.y + projectionRectangle.height;
 
 	//hole 6

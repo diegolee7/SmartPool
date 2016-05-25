@@ -53,6 +53,7 @@ public:
     bool intersection(Point2f o1, Point2f p1, Point2f o2, Point2f p2,
                           Point2f &r);
     int checkHoles(Point2f trajectoryStartPoint, Point2f trajectoryEndPoint, Point2f &r);
+    bool circleLineIntersect(Point2f trajectoryStartPoint, Point2f trajectoryEndPoint, Vec3f circle);
 };
 
 #endif // PROJECTIONWINDOW_H
