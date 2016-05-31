@@ -56,15 +56,13 @@ private:
     vector<Vec3f> findWhiteBall(Mat frame);
     Mat backgroundSubtract(Mat frame);
     vector<Vec3f> findCue(Mat frame);
-    Point mean(int x1, int y1, int x2, int y2);
-    float angle(Vec4i line, int x, int y);
 
 public:
     FrameProcessor();
     void processFrame(Mat frame);
     vector<Vec3f> getWhiteBalls();
     vector<Vec3f> getAllBalls();
-    Vec4i findLine(Mat frame);
+    vector<Vec4i> findLines(Mat frame);
     Mat applyMedianBlur (Mat frame, int iterations, int ksize);
     void findCountours (Mat frame);
 };

@@ -62,13 +62,13 @@ void SmartPool::processAndDisplay() {
 	vector<Vec3f> whiteBalls = frameProcessor.getWhiteBalls();
 
     mainWindow.showWindow(frame,allBalls,whiteBalls);
-    //Rect tableRectangle = mainWindow.getTableRectangle();
+    Rect tableRectangle = mainWindow.getTableRectangle();
 
-    //projectionWindow.setTableRectangle(tableRectangle);
-    //projectionWindow.setAllBalls(allBalls);
-    //projectionWindow.setWhiteBalls(whiteBalls);
-    //projectionWindow.setMousePosition(mainWindow.getMouseX(),mainWindow.getMouseY());
-    //projectionWindow.showWindow();
+    projectionWindow.setTableRectangle(tableRectangle);
+    projectionWindow.setAllBalls(allBalls);
+    projectionWindow.setWhiteBalls(whiteBalls);
+    projectionWindow.setMousePosition(mainWindow.getMouseX(),mainWindow.getMouseY());
+    projectionWindow.showWindow();
 }
 
 int main() {

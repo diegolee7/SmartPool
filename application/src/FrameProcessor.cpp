@@ -1,9 +1,7 @@
 #include "FrameProcessor.hpp"
 
 #include <iostream>
-#include <math.h>
 
-#define PI 3.14159265
 
 FrameProcessor::FrameProcessor() {
 
@@ -118,52 +116,20 @@ Mat FrameProcessor::applyMedianBlur(Mat frame, int iterations, int ksize){
     return frame;
 }
 
-Point FrameProcessor::mean(int x1, int y1, int x2, int y2){
-    Point aux((x1+x2)/2,(y1+y2)/2);
-    return aux;
-}
-
-float FrameProcessor::angle(Vec4i line, int x, int y){
-    int x1,x2,y1,y2;
-    x1 = line[2] - line[0];
-    x2 = x - line[0];
-
-    y1 = line[3] - line[1];
-    y2 = y - line[1];
-
-    int aux = ((x1*x2) + (y1*y2))/(sqrt((x1*x1) + (y1*y1)) * sqrt((x2*x2) + (y2*y2)));
-    return acos(aux)*180/PI;
-}
-
-Vec4i FrameProcessor::findLine(Mat frame) {
+vector<Vec4i> FrameProcessor::findLines(Mat frame) {
 	Mat dst, color_dst;
 	vector<Vec4i> lines;
 	Canny( frame, dst, 50, 200, 3 );
 	cvtColor( dst, color_dst, CV_GRAY2BGR );
-	HoughLinesP( dst, lines, 1, CV_PI/180, 50, 30, 10 );
-
-	Vec4i cue;
-    if(lines.size()>=2)
-    {
-        //line( color_dst, Point(lines[0][0], lines[0][1]),Point(lines[0][2], lines[0][3]), Scalar(0,0,255), 3, 8 );
-        for( size_t i = 1; i < lines.size(); i++ )
-        {
-            if(angle(lines[0], lines[i][0], lines[i][1])>30){
-                Point p1 = mean(lines[0][0],lines[0][1],lines[i][0], lines[i][1]);
-                Point p2 = mean(lines[0][2], lines[0][3],lines[i][2], lines[i][3]);
-                //cue = Vec4i(p1[0],p1[1],p2[0],p2[1]);
-                line( color_dst, p1, p2, Scalar(0,0,255), 3, 8 );
-                //line( color_dst, Point(lines[i][0], lines[i][1]),Point(lines[i][2], lines[i][3]), Scalar(0,0,255), 3, 8 );
-                //line( color_dst, Point(lines[0][0], lines[0][1]),Point(lines[i][0], lines[i][1]), Scalar(0,0,255), 3, 8 );
-                //line( color_dst, Point(lines[0][2], lines[0][3]),Point(lines[i][2], lines[i][3]), Scalar(0,0,255), 3, 8 );
-                break;
-            }
-        }
-    }
-
+	HoughLinesP( dst, lines, 1, CV_PI/180, 80, 30, 10 );
+	for( size_t i = 0; i < lines.size(); i++ )
+	{
+		line( color_dst, Point(lines[i][0], lines[i][1]),
+			Point(lines[i][2], lines[i][3]), Scalar(0,0,255), 3, 8 );
+	}
 	namedWindow( "Detected Lines", 1 );
 	imshow( "Detected Lines", color_dst );
-	return cue;
+	return lines;
 }
 
 Mat FrameProcessor::backgroundSubtract(Mat frame) {
@@ -291,6 +257,8 @@ vector<Vec3f> FrameProcessor::findWhiteBall(Mat frame){
     dilate(frameThresholded, frameThresholded, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)) );
     erode(frameThresholded, frameThresholded, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)) );
 
+    findLines(frameThresholded);
+
     // Reduce the noise so we avoid false circle detection
     GaussianBlur(frameThresholded, frameThresholded, Size(15, 15), 5, 5);
 
@@ -384,7 +352,7 @@ void FrameProcessor::findMostFrequentColor (Mat frame) {
 vector<Vec3f> FrameProcessor::findCue(Mat frame){
     Mat frameThresholded;
 
-    inRange(frame, Scalar(240,240,240)
+    inRange(frame, Scalar(230,230,230)
            ,Scalar(255, 255, 255), frameThresholded);
 
     //morphological opening (removes small objects from the foreground)
@@ -397,9 +365,9 @@ vector<Vec3f> FrameProcessor::findCue(Mat frame){
 
     // Reduce the noise so we avoid false circle detection
     GaussianBlur(frameThresholded, frameThresholded, Size(15, 15), 5, 5);
-    //Mat img;
-    //img = imread("Detected Lines.jpg", CV_LOAD_IMAGE_GRAYSCALE);
-    Vec4i lines = findLine(frameThresholded);
+    vector<Vec4i> lines = findLines(frameThresholded);
+
+    cout << lines.size();
 
     vector<Vec3f> circles;
     return circles;

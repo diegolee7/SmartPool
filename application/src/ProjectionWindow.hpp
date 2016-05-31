@@ -10,6 +10,17 @@ using namespace cv;
 class ProjectionWindow {
 
 private:
+	struct Table {
+		Point2f p1;
+		Point2f p2;
+		Point2f p3;
+		Point2f p4;
+	} table;
+
+	struct Holes {
+		Point2f h[6][2];
+	} holes;
+
     static const int frameWidth = 1280;
     static const int frameHeight = 720;
     static const string windowProjectionName;
@@ -39,6 +50,10 @@ public:
     void setWhiteBalls ( vector<Vec3f> whiteBalls);
     void setMousePosition(int mouseX, int mouseY);
     void drawTrajectory();
+    bool intersection(Point2f o1, Point2f p1, Point2f o2, Point2f p2,
+                          Point2f &r);
+    int checkHoles(Point2f trajectoryStartPoint, Point2f trajectoryEndPoint, Point2f &r);
+    bool circleLineIntersect(Point2f trajectoryStartPoint, Point2f trajectoryEndPoint, Vec3f circle);
 };
 
 #endif // PROJECTIONWINDOW_H
