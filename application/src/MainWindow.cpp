@@ -32,7 +32,7 @@ void CallBackFunc(int event, int x, int y, int flags, void* userdata)
 
 MainWindow::MainWindow() {
     namedWindow(windowName, WINDOW_AUTOSIZE);
-
+    moveWindow(windowName, 0,0);
     //set the callback function for any mouse event
     setMouseCallback(windowName, CallBackFunc, this);
     mouseX = 0;

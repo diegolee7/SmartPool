@@ -8,7 +8,7 @@ const string ProjectionWindow::windowProjectionName = "Projection";
 const string ProjectionWindow::windowControlName = "Projection Control";
 
 ProjectionWindow::ProjectionWindow() {
-    namedWindow(windowProjectionName, WINDOW_AUTOSIZE);
+    namedWindow(windowProjectionName, CV_WINDOW_NORMAL);
     moveWindow(windowProjectionName, 1980,0);
     setWindowProperty(windowProjectionName, WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
     frame = Mat(frameHeight, frameWidth, CV_8UC3, Scalar(0,0,0));
