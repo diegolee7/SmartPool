@@ -37,10 +37,10 @@ MainWindow::MainWindow() {
     setMouseCallback(windowName, CallBackFunc, this);
     mouseX = 0;
     mouseY = 0;
-    boardUpperLeft.x = 308;
-    boardUpperLeft.y = 115;
-    boardBottomRight.x = 902;
-    boardBottomRight.y = 444;
+    boardUpperLeft.x = 321;
+    boardUpperLeft.y = 186;
+    boardBottomRight.x = 889;
+    boardBottomRight.y = 504;
     whiteBallX = 0;
     whiteBallY = 0;
     whiteBallRadius = 0;
@@ -77,7 +77,7 @@ void MainWindow::showWindow (Mat frame, vector<Vec3f> circles, vector<Vec3f> whi
 
     //draw Cue
     //line(img, pt1, pt2, color, thickness=1, lineType=8, shift=0);
-    line(frame,Point(whiteBallX + deltaX, whiteBallY + deltaY), Point(xBorder+whiteBallX, yBorder+whiteBallY), Scalar(255,0,200), 4, CV_AA, 0 );
+    //line(frame,Point(whiteBallX + deltaX, whiteBallY + deltaY), Point(xBorder+whiteBallX, yBorder+whiteBallY), Scalar(255,0,200), 4, CV_AA, 0 );
 
     Rect tableRectangle = Rect (boardUpperLeft,boardBottomRight);
     rectangle(frame, tableRectangle, Scalar(255,0,255), 2, 8, 0);

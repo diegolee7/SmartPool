@@ -10,7 +10,8 @@ const string ProjectionWindow::windowControlName = "Projection Control";
 ProjectionWindow::ProjectionWindow() {
     namedWindow(windowProjectionName, CV_WINDOW_NORMAL);
     moveWindow(windowProjectionName, 1980,0);
-    setWindowProperty(windowProjectionName, WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+    //setWindowProperty(windowProjectionName, WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+    setWindowProperty(windowProjectionName, WND_PROP_FULLSCREEN, CV_WINDOW_AUTOSIZE);
     frame = Mat(frameHeight, frameWidth, CV_8UC3, Scalar(0,0,0));
 
     boardUpperLeft.x = 249;
@@ -26,8 +27,20 @@ ProjectionWindow::ProjectionWindow() {
     createTrackbar("y1", windowControlName, &boardUpperLeft.y, 1000);
     createTrackbar("x2", windowControlName, &boardBottomRight.x, 2000);
     createTrackbar("y2", windowControlName, &boardBottomRight.y, 2000);
+    cue = {0,0,0,0};
+
 }
 
+void ProjectionWindow::showWindow(){
+
+	//cout << "Cue: "<< cue << endl;
+	startProjectionScaleAndHoles();
+    clearFrame();
+    drawBoard();
+    drawAllBalls();
+    drawTrajectory();
+    imshow(windowProjectionName, frame);
+}
 
 
 void ProjectionWindow::drawAllBalls(){
@@ -59,8 +72,19 @@ void ProjectionWindow::drawAllBalls(){
 		newY = newY * yProportion;
 		newY += projectionRectangle.y;
 		//std::cout << "\ny: " << c[1] << "\tnew y: " << newX << endl;
-        circle(frame, Point(newX, newY),16*6 , Scalar(0,255,0), -1, CV_AA);
+        circle(frame, Point(newX, newY),lightOnWhiteBallSize, Scalar(0,255,0), -1, CV_AA);
+        whiteBallLightArea[0] = newX;
+        whiteBallLightArea[1] = newY;
+        whiteBallLightArea[2] = lightOnWhiteBallSize;
+
     }
+}
+
+bool ProjectionWindow::isPointInsideCircle(Point p,Vec3i c){
+	//cout << p << c << endl;
+	//cout << pow(c[2],2) << endl;
+	//cout << pow(p.x-c[0],2) + pow(p.y - c[1],2) << endl;
+	return (pow(c[2],2) > pow(p.x-c[0],2) + pow(p.y - c[1],2));
 }
 
 void ProjectionWindow::drawBoard(){
@@ -70,10 +94,47 @@ void ProjectionWindow::drawBoard(){
 
 }
 
+Point2f ProjectionWindow::getCuePointNearWhiteBall(){
+	//cout << "Cue: " << cue << endl;
+	Vec3i ball = whiteBalls[0];
+	int whiteBallX = ball[0];
+	int whiteBallY = ball[1];
+
+	Point2f a(whiteBallX,whiteBallY);
+	Point2f b(cue[0],cue[1]);
+	Point2f c(cue[2],cue[3]);
+	double res1 = cv::norm(a-b);
+	double res2 = cv::norm(a-c);
+	if (res1 < res2){
+		return b;
+	} else {
+		return c;
+	}
+}
+
 void ProjectionWindow::drawTrajectory(){
     int whiteBallX = 0;
     int whiteBallY = 0;
     int whiteBallRadius = 16;
+
+    Point2f cuePoint = getCuePointNearWhiteBall();
+    int cuePointX = cuePoint.x;
+    int cuePointY = cuePoint.y;
+    mouseX = cuePointX;
+    mouseY = cuePointY;
+
+    mouseX = mouseX - tableRectangle.x;
+    mouseX = mouseX * xProportion;
+    mouseX += projectionRectangle.x;
+    //std::cout << "\nx: " << c[0] << "\tnew x: " << newX << endl;
+    mouseY = mouseY - tableRectangle.y;
+    mouseY = mouseY * yProportion;
+    mouseY += projectionRectangle.y;
+
+    if (!isPointInsideCircle(Point(mouseX,mouseY),whiteBallLightArea)){
+    	//cout << "Cue outside white ball light area" << endl;
+    	return;
+    }
 
     for (size_t i = 0; i < whiteBalls.size(); i++) {
         Vec3i c = whiteBalls[i];
@@ -87,13 +148,7 @@ void ProjectionWindow::drawTrajectory(){
 		//std::cout << "\ny: " << c[1] << "\tnew y: " << newX << endl;
     }
 
-    mouseX = mouseX - tableRectangle.x;
-    mouseX = mouseX * xProportion;
-    mouseX += projectionRectangle.x;
-    //std::cout << "\nx: " << c[0] << "\tnew x: " << newX << endl;
-    mouseY = mouseY - tableRectangle.y;
-    mouseY = mouseY * yProportion;
-    mouseY += projectionRectangle.y;
+
 
 	//angle between two points
     float angle = atan2(whiteBallY - mouseY, whiteBallX- mouseX);
@@ -107,8 +162,8 @@ void ProjectionWindow::drawTrajectory(){
     int x1 = whiteBallX + deltaX;
     int y1 = whiteBallY + deltaY;
 
-    x1 = whiteBallX + 1000*cos(angle);
-    y1 = whiteBallY + 1000*sin(angle);
+    x1 = whiteBallX + 1500*cos(angle);
+    y1 = whiteBallY + 1500*sin(angle);
 
     int x2 = xBorder+whiteBallX;
     x2 = x2 * xProportion;
@@ -155,7 +210,7 @@ void ProjectionWindow::drawTrajectory(){
 	c[2] = 50;
 	circle(frame, Point(c[0], c[1]),c[2] , Scalar(0,255,0), 3, CV_AA);
 	bool circleLine = circleLineIntersect(trajectoryStartPoint,trajectoryEndPoint,c);
-	cout << "Circle Line: " << circleLine <<endl;
+	//cout << "Circle Line Intersection: " << circleLine <<endl;
 
 	//prevent for loop forever
 	int maxIterations = 5;
@@ -165,7 +220,7 @@ void ProjectionWindow::drawTrajectory(){
 		hole = checkHoles(trajectoryStartPoint,trajectoryEndPoint, holePoint);
 		if(hole > -1){
 			trajectoryEndPoint = holePoint;
-			cout << "Hole: " << holePoint << endl;
+			//cout << "Ball is going into Hole: " << holePoint << endl;
 			lines.push_back(Vec4i(trajectoryStartPoint.x,trajectoryStartPoint.y,
 					trajectoryEndPoint.x,trajectoryEndPoint.y));
 			foundAllCollisions = true;
@@ -215,7 +270,7 @@ void ProjectionWindow::drawTrajectory(){
 
 	//Point2f point1
     for(unsigned int i = 0; i < lines.size(); i++){
-    	cout << "Lines size: " << lines.size() << endl;
+    	//cout << "Lines size: " << lines.size() << endl;
     	Vec4i tempLine = lines[i];
     	line(frame,Point(tempLine[0],tempLine[1]), Point(tempLine[2], tempLine[3]), Scalar(255,255,0), 4, CV_AA, 0 );
     	//cout << "Drawing trajectory " << i << "(" << tempLine[0] << "," << tempLine[1] << ") "
@@ -295,7 +350,8 @@ bool ProjectionWindow::intersection(Point2f o1, Point2f p1, Point2f o2, Point2f 
     return false;
 }
 
-void ProjectionWindow::showWindow(){
+
+void ProjectionWindow::startProjectionScaleAndHoles(){
 
 	yProportion = (double)projectionRectangle.height/
 						(double)tableRectangle.height;
@@ -350,12 +406,8 @@ void ProjectionWindow::showWindow(){
 
 	//cout << "h11: " << holes.h11
 
-    clearFrame();
-    drawBoard();
-    drawAllBalls();
-    drawTrajectory();
-    imshow(windowProjectionName, frame);
 }
+
 
 void ProjectionWindow::clearFrame(){
     frame = Mat(frameHeight, frameWidth, CV_8UC3, Scalar(0,0,0));
@@ -378,4 +430,8 @@ void ProjectionWindow::setWhiteBalls ( vector<Vec3f> whiteBalls){
 void ProjectionWindow::setMousePosition(int mouseX, int mouseY){
 	this->mouseX = mouseX;
 	this->mouseY = mouseY;
+}
+
+void ProjectionWindow::setCue(Vec4i cue){
+	this->cue = cue;
 }

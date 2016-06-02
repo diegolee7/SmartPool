@@ -55,9 +55,10 @@ private:
     vector<Vec3f> findAllBalls(Mat frame);
     vector<Vec3f> findWhiteBall(Mat frame);
     Mat backgroundSubtract(Mat frame);
-    vector<Vec3f> findCue(Mat frame);
+    Vec4i findCue(Mat frame);
     Point mean(int x1, int y1, int x2, int y2);
     float angle(Vec4i line, int x, int y);
+    Vec4i cue;
 
 public:
     FrameProcessor();
@@ -67,6 +68,7 @@ public:
     Vec4i findLine(Mat frame);
     Mat applyMedianBlur (Mat frame, int iterations, int ksize);
     void findCountours (Mat frame);
+    Vec4i getCue ();
 };
 
 #endif // OBJECTFINDER_H

@@ -21,6 +21,7 @@ private:
 		Point2f h[6][2];
 	} holes;
 
+	static const int lightOnWhiteBallSize = 16*12;
     static const int frameWidth = 1280;
     static const int frameHeight = 720;
     static const string windowProjectionName;
@@ -35,6 +36,9 @@ private:
 	int mouseY;
 	double yProportion;
 	double xProportion;
+	Vec4i cue;
+	void startProjectionScaleAndHoles();
+	Vec3i whiteBallLightArea;
 
 public:
     ProjectionWindow();
@@ -54,6 +58,9 @@ public:
                           Point2f &r);
     int checkHoles(Point2f trajectoryStartPoint, Point2f trajectoryEndPoint, Point2f &r);
     bool circleLineIntersect(Point2f trajectoryStartPoint, Point2f trajectoryEndPoint, Vec3f circle);
+    void setCue (Vec4i cue);
+    Point2f getCuePointNearWhiteBall();
+    bool isPointInsideCircle (Point p,Vec3i c);
 };
 
 #endif // PROJECTIONWINDOW_H

@@ -12,6 +12,7 @@ FrameProcessor::FrameProcessor() {
     maxRed = 0;
     maxBlue = 0;
     maxGreen = 0;
+    cue = {0,0,0,0};
     updateControlVariables();
 }
 
@@ -143,8 +144,7 @@ Vec4i FrameProcessor::findLine(Mat frame) {
 	HoughLinesP( dst, lines, 1, CV_PI/180, 50, 30, 10 );
 
 	Vec4i cue;
-    if(lines.size()>=2)
-    {
+    if(lines.size()>=2) {
         //line( color_dst, Point(lines[0][0], lines[0][1]),Point(lines[0][2], lines[0][3]), Scalar(0,0,255), 3, 8 );
         for( size_t i = 1; i < lines.size(); i++ )
         {
@@ -153,6 +153,10 @@ Vec4i FrameProcessor::findLine(Mat frame) {
                 Point p2 = mean(lines[0][2], lines[0][3],lines[i][2], lines[i][3]);
                 //cue = Vec4i(p1[0],p1[1],p2[0],p2[1]);
                 line( color_dst, p1, p2, Scalar(0,0,255), 3, 8 );
+                cue[0] = p1.x;
+                cue[1] = p1.y;
+                cue[2] = p2.x;
+                cue[3] = p2.y;
                 //line( color_dst, Point(lines[i][0], lines[i][1]),Point(lines[i][2], lines[i][3]), Scalar(0,0,255), 3, 8 );
                 //line( color_dst, Point(lines[0][0], lines[0][1]),Point(lines[i][0], lines[i][1]), Scalar(0,0,255), 3, 8 );
                 //line( color_dst, Point(lines[0][2], lines[0][3]),Point(lines[i][2], lines[i][3]), Scalar(0,0,255), 3, 8 );
@@ -381,7 +385,7 @@ void FrameProcessor::findMostFrequentColor (Mat frame) {
     imshow("Histogram", histImage );
 }
 
-vector<Vec3f> FrameProcessor::findCue(Mat frame){
+Vec4i FrameProcessor::findCue(Mat frame){
     Mat frameThresholded;
 
     inRange(frame, Scalar(240,240,240)
@@ -399,10 +403,9 @@ vector<Vec3f> FrameProcessor::findCue(Mat frame){
     GaussianBlur(frameThresholded, frameThresholded, Size(15, 15), 5, 5);
     //Mat img;
     //img = imread("Detected Lines.jpg", CV_LOAD_IMAGE_GRAYSCALE);
-    Vec4i lines = findLine(frameThresholded);
+    cue = findLine(frameThresholded);
 
-    vector<Vec3f> circles;
-    return circles;
+    return cue;
 }
 
 vector<Vec3f> FrameProcessor::getAllBalls() {
@@ -411,6 +414,10 @@ vector<Vec3f> FrameProcessor::getAllBalls() {
 
 vector<Vec3f> FrameProcessor::getWhiteBalls() {
 	return whiteBall;
+}
+
+Vec4i FrameProcessor::getCue(){
+	return cue;
 }
 
 

@@ -64,6 +64,8 @@ void SmartPool::processAndDisplay() {
     mainWindow.showWindow(frame,allBalls,whiteBalls);
     Rect tableRectangle = mainWindow.getTableRectangle();
 
+    Vec4i cue = frameProcessor.getCue();
+    projectionWindow.setCue(cue);
     projectionWindow.setTableRectangle(tableRectangle);
     projectionWindow.setAllBalls(allBalls);
     projectionWindow.setWhiteBalls(whiteBalls);

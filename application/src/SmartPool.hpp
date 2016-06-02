@@ -27,9 +27,10 @@ private:
     static const string videoPathAfterHomeDir;
     static const string videoName;
 
-    ProjectionWindow projectionWindow;
+
     FrameProcessor frameProcessor;
     MainWindow mainWindow;
+    ProjectionWindow projectionWindow;
 
     Mat frame;
     bool drawTableBoard;
