@@ -42,10 +42,10 @@ void FrameProcessor::processFrame(Mat frame){
 	//Mat subtractedFrame = backgroundSubtract(frame);
 
 	//cout << "\nFrame segment";
-	//Mat segmentedFrame = segmentTable(frame);
+	Mat segmentedFrame = segmentTable(frame);
 
 	//segmentedFrame = applyMedianBlur(segmentedFrame, 1, 3);
-	//findCountours(segmentedFrame);
+	findCountours(segmentedFrame);
 	//cout << "\nFind all balls";
 	//allBalls = findAllBalls(segmentedFrame);
 	//cout << "\nFind white ball";
@@ -90,6 +90,9 @@ void FrameProcessor::findCountours (Mat frame){
     // Draw Circles on Gray frame with GaussianBlur
 	int j = 0;
 	float contourArea;
+	if(mc.size() > 0){
+		allBalls.clear();
+	}
     for (size_t i = 0; i < mc.size(); i++) {
     	contourArea = mu[i].m00;
     	if(contourArea > 400 && contourArea < 1200 ){
@@ -97,6 +100,7 @@ void FrameProcessor::findCountours (Mat frame){
 			circle(frame, c, 16, Scalar(0,0,255), 1, CV_AA);
 			circle(frame, c, 2, Scalar(0,255,0), 1, CV_AA);
 			//printf("\nitem %d size: %.2f",j, mu[i].m00);
+			allBalls.push_back(Vec3f(c.x,c.y,16));
 			j++;
     	}
     }
@@ -114,8 +118,8 @@ Mat FrameProcessor::applyMedianBlur(Mat frame, int iterations, int ksize){
     for ( int i = 1; i < iterations; i ++ ){
     	medianBlur ( frame, frame, ksize );
     }
-	namedWindow( "Median Filter", 1 );
-	imshow( "Median Filter", frame );
+	//namedWindow( "Median Filter", 1 );
+	//imshow( "Median Filter", frame );
     return frame;
 }
 

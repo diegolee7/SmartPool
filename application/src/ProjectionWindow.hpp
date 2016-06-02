@@ -21,7 +21,7 @@ private:
 		Point2f h[6][2];
 	} holes;
 
-	static const int lightOnWhiteBallSize = 16*12;
+	static const int lightOnWhiteBallSize = 16*8;
     static const int frameWidth = 1280;
     static const int frameHeight = 720;
     static const string windowProjectionName;
