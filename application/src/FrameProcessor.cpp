@@ -150,8 +150,7 @@ Vec4i FrameProcessor::findLine(Mat frame) {
 	Vec4i cue;
     if(lines.size()>=2) {
         //line( color_dst, Point(lines[0][0], lines[0][1]),Point(lines[0][2], lines[0][3]), Scalar(0,0,255), 3, 8 );
-        for( size_t i = 1; i < lines.size(); i++ )
-        {
+        for( size_t i = 1; i < lines.size(); i++ ) {
             if(angle(lines[0], lines[i][0], lines[i][1])>30){
                 Point p1 = mean(lines[0][0],lines[0][1],lines[i][0], lines[i][1]);
                 Point p2 = mean(lines[0][2], lines[0][3],lines[i][2], lines[i][3]);
@@ -269,6 +268,7 @@ Mat FrameProcessor::segmentTable (Mat frame){
 
     cvtColor(frameThresholded, frameThresholded, CV_GRAY2BGR);
 
+    /*
     int c = waitKey(10);
     if ((char)c == 'n') {
         showBalls = !showBalls;
@@ -279,6 +279,8 @@ Mat FrameProcessor::segmentTable (Mat frame){
         cout << "show balls: " << showBalls;
     }
     imshow("Frame Thresholded", frameThresholded );
+    */
+
     return frameThresholded;
 }
 
@@ -300,16 +302,16 @@ vector<Vec3f> FrameProcessor::findWhiteBall(Mat frame){
     erode(frameThresholded, frameThresholded, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)) );
 
     // Reduce the noise so we avoid false circle detection
-    GaussianBlur(frameThresholded, frameThresholded, Size(15, 15), 5, 5);
+    GaussianBlur(frameThresholded, frameThresholded, Size(9, 9), 5, 5);
 
     vector<Vec3f> circles;
     HoughCircles(frameThresholded, circles, CV_HOUGH_GRADIENT, (double)dp/100, distanceBetweenCircleCenters , cannyThreshold,
                  30, 14, 16);
 
-    for (size_t i = 0; i < circles.size(); i++) {
+    //for (size_t i = 0; i < circles.size(); i++) {
         //Vec3i c = circles[i];
         //cout << "\nWhite ball << i <<: (" << c[0] << "," << c[1] << ") radius=" << c[2];
-    }
+    //}
 
 
     //imshow("White Ball", frameThresholded );
@@ -404,7 +406,7 @@ Vec4i FrameProcessor::findCue(Mat frame){
     erode(frameThresholded, frameThresholded, getStructuringElement(MORPH_ELLIPSE, Size(2, 2)) );
 
     // Reduce the noise so we avoid false circle detection
-    GaussianBlur(frameThresholded, frameThresholded, Size(15, 15), 5, 5);
+    GaussianBlur(frameThresholded, frameThresholded, Size(9, 9), 5, 5);
     //Mat img;
     //img = imread("Detected Lines.jpg", CV_LOAD_IMAGE_GRAYSCALE);
     cue = findLine(frameThresholded);

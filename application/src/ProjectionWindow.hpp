@@ -21,7 +21,7 @@ private:
 		Point2f h[6][2];
 	} holes;
 
-	static const int lightOnWhiteBallSize = 16*8;
+	static const int lightOnWhiteBallSize = 16*10;
     static const int frameWidth = 1280;
     static const int frameHeight = 720;
     static const string windowProjectionName;
@@ -59,7 +59,7 @@ public:
     int checkHoles(Point2f trajectoryStartPoint, Point2f trajectoryEndPoint, Point2f &r);
     bool circleLineIntersect(Point2f trajectoryStartPoint, Point2f trajectoryEndPoint, Vec3f circle);
     void setCue (Vec4i cue);
-    Point2f getCuePointNearWhiteBall();
+    Point2f getCuePointNearWhiteBall(Vec4i tempCue);
     bool isPointInsideCircle (Point p,Vec3i c);
 };
 

@@ -94,15 +94,15 @@ void ProjectionWindow::drawBoard(){
 
 }
 
-Point2f ProjectionWindow::getCuePointNearWhiteBall(){
+Point2f ProjectionWindow::getCuePointNearWhiteBall(Vec4i tempCue){
 	//cout << "Cue: " << cue << endl;
 	Vec3i ball = whiteBalls[0];
 	int whiteBallX = ball[0];
 	int whiteBallY = ball[1];
 
 	Point2f a(whiteBallX,whiteBallY);
-	Point2f b(cue[0],cue[1]);
-	Point2f c(cue[2],cue[3]);
+	Point2f b(tempCue[0],tempCue[1]);
+	Point2f c(tempCue[2],tempCue[3]);
 	double res1 = cv::norm(a-b);
 	double res2 = cv::norm(a-c);
 	if (res1 < res2){
@@ -117,7 +117,7 @@ void ProjectionWindow::drawTrajectory(){
     int whiteBallY = 0;
     int whiteBallRadius = 16;
 
-    Point2f cuePoint = getCuePointNearWhiteBall();
+    Point2f cuePoint = getCuePointNearWhiteBall(cue);
     int cuePointX = cuePoint.x;
     int cuePointY = cuePoint.y;
     mouseX = cuePointX;
@@ -424,6 +424,11 @@ void ProjectionWindow::setAllBalls ( vector<Vec3f> allBalls){
 void ProjectionWindow::setWhiteBalls ( vector<Vec3f> whiteBalls){
 	if(whiteBalls.size() > 0){
 		this->whiteBalls = whiteBalls;
+	} else {
+		cue[0] = 0;
+		cue[1] = 0;
+		cue[2] = 0;
+		cue[3] = 0;
 	}
 }
 
@@ -433,5 +438,25 @@ void ProjectionWindow::setMousePosition(int mouseX, int mouseY){
 }
 
 void ProjectionWindow::setCue(Vec4i cue){
-	this->cue = cue;
+
+	Point2f cuePoint = getCuePointNearWhiteBall(cue);
+    int cuePointX = cuePoint.x;
+    int cuePointY = cuePoint.y;
+    mouseX = cuePointX;
+    mouseY = cuePointY;
+
+    mouseX = mouseX - tableRectangle.x;
+    mouseX = mouseX * xProportion;
+    mouseX += projectionRectangle.x;
+    //std::cout << "\nx: " << c[0] << "\tnew x: " << newX << endl;
+    mouseY = mouseY - tableRectangle.y;
+    mouseY = mouseY * yProportion;
+    mouseY += projectionRectangle.y;
+
+    if (isPointInsideCircle(Point(mouseX,mouseY),whiteBallLightArea)){
+    	//cout << "Cue outside white ball light area" << endl;
+    	this->cue = cue;
+    }
+
+    return;
 }
