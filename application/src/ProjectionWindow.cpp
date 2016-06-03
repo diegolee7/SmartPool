@@ -208,7 +208,7 @@ void ProjectionWindow::drawTrajectory(){
 	c[0] = 500;
 	c[1] = 200;
 	c[2] = 50;
-	circle(frame, Point(c[0], c[1]),c[2] , Scalar(0,255,0), 3, CV_AA);
+	//circle(frame, Point(c[0], c[1]),c[2] , Scalar(0,255,0), 3, CV_AA);
 	bool circleLine = circleLineIntersect(trajectoryStartPoint,trajectoryEndPoint,c);
 	//cout << "Circle Line Intersection: " << circleLine <<endl;
 
