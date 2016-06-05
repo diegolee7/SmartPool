@@ -112,8 +112,8 @@ void ProjectionWindow::drawTrajectory(){
     Point2f cuePoint = getCuePointNearWhiteBall(cue);
 
     //comment two lines below to use mouse as cue
-    //mouseX = cuePoint.x;
-    //mouseY = cuePoint.y;
+    mouseX = cuePoint.x;
+    mouseY = cuePoint.y;
 
     mouseX = mouseX - tableRectangle.x;
     mouseX = mouseX * xProportion;
@@ -154,8 +154,8 @@ void ProjectionWindow::drawTrajectory(){
     int x1 = whiteBallX + deltaX;
     int y1 = whiteBallY + deltaY;
 
-    x1 = whiteBallX + 1500*cos(angle);
-    y1 = whiteBallY + 1500*sin(angle);
+    x1 = whiteBallX + 1000*cos(angle);
+    y1 = whiteBallY + 1000*sin(angle);
 
     int x2 = xBorder+whiteBallX;
     x2 = x2 * xProportion;
@@ -186,7 +186,6 @@ void ProjectionWindow::drawTrajectory(){
     //draw Cue
     //line(img, pt1, pt2, color, thickness=1, lineType=8, shift=0);
 
-	bool foundAllCollisions = false;
 	float delta = 0;
 	Point2f intersectionPoint;
 	Point2f trajStart;
@@ -206,98 +205,109 @@ void ProjectionWindow::drawTrajectory(){
 	//pointLineDistance(trajStart,trajectoryEndPoint,Point2f(500,500));
 	//circle(frame, Point(500,500),5 , Scalar(255,255,255), 3, CV_AA);
 
+	bool canOnlyCollideOnce = true;
 
-	//check if white ball collides with any other
-	//cout << "Balls found: " << allBalls.size() << endl;
-	Point2f pointOnLine;
-	vector<Point2f> collisionsWhite;
-	vector<Point2f> collisionsNumbered;
-
-	for (size_t i = 0; i < allBalls.size(); i++) {
-        Vec3i c = allBalls[i];
-		//check if this is not the white ball itself
-        //check if the distance from white ball center is bigger than radius
-		if(norm(trajStart-Point2f(c[0],c[1])) >= ballsRadius){
-
-			//if distance is < radius*2 then it collides
-			if(pointLineDistance(trajStart,trajEnd,Point2f(c[0],c[1]),pointOnLine) <= ballsRadius*2){
-				cout << "Collision: " << i << c[0] << "," <<c[1] << endl;
-				cout << "Projection Point on line " << pointOnLine << endl;
-
-				//check if point is on line segment, not on the back (lines are infinite)
-				float maxX = max(trajStart.x,trajEnd.x);
-				float maxY = max(trajStart.y,trajEnd.y);
-				float minX = min(trajStart.x,trajEnd.x);
-				float minY = min(trajStart.y,trajEnd.y);
-				if (pointOnLine.x < maxX && pointOnLine.x > minX &&
-					pointOnLine.y < maxY && pointOnLine.y > minY){
-					//circle(frame, Point(c[0],c[1]),ballsRadius, Scalar(255,255,255), -1, CV_AA);
-					collisionsNumbered.push_back(Point2f(c[0],c[1]));
-
-					//so here I have to apply Pitagoras do find out where was the first collision
-					float dist1 = norm(pointOnLine-Point2f(c[0],c[1]));
-					float dist2 = ballsRadius*2;
-					float dist3 = sqrt(dist2*dist2 - dist1*dist1);
-					Point2f collision;
-					collision.x = pointOnLine.x - (pointOnLine.x - trajStart.x) / norm(pointOnLine - trajStart) * dist3;
-					collision.y = pointOnLine.y - (pointOnLine.y - trajStart.y) / norm(pointOnLine - trajStart) * dist3;
-					collisionsWhite.push_back(Point2f(collision.x,collision.y));
-				}
-			}
-		} else {
-			//cout << "White ball is: " << i << trajStart <<endl;
-		}
-    }
-
-	//check which collision is the first one
-	int closestBall = 0;
-	float dist = 99999;
-	if(collisionsWhite.size() > 0){
-		for(int i = 0; i< collisionsWhite.size() ; i++){
-			if(norm (collisionsWhite[i] - collisionsWhite[closestBall]) < dist){
-				closestBall = i;
-				dist = norm (collisionsWhite[i] - collisionsWhite[closestBall]);
-			}
-		}
-		circle(frame, collisionsWhite[closestBall], ballsRadius, Scalar(255,255,0), -1, CV_AA);
-		circle(frame, collisionsNumbered[closestBall], ballsRadius, Scalar(255,255,0), -1, CV_AA);
-		trajEnd = collisionsWhite[closestBall];
-
-		Point2f colWhite = collisionsWhite[closestBall];
-		Point2f colNumbered = collisionsNumbered[closestBall];
-
-		//angle between two points
-	    angle = atan2(colWhite.y - colNumbered.y, colWhite.x- colNumbered.x);
-
-	    x1 = colNumbered.x - 200*cos(angle);
-	    y1 = colNumbered.y - 200*sin(angle);
-
-	    lines.push_back(Vec4i(colNumbered.x,colNumbered.y,x1,y1));
-
-	    //calculate the white ball new vector
-	    Point2f newWhite;
-	    pointLineDistance(colNumbered,Point2f(x1,y1),trajStart,newWhite);
-
-	    angle = atan2(trajStart.y - newWhite.y, trajStart.x- newWhite.x);
-
-	    x1 = colWhite.x - 300*cos(angle);
-	    y1 = colWhite.y - 300*sin(angle);
-
-	    lines.push_back(Vec4i(colWhite.x,colWhite.y,x1,y1));
-	}
+	//prevent loop forever
+	unsigned int maxIterations = 5;
 
 	vector<Vec4i> trajectories;
 	trajectories.clear();
 	trajectories.push_back(Vec4i(trajStart.x,trajStart.y,trajEnd.x,trajEnd.y));
 
 	int hole = 0;
-	for(int j = 0; j< trajectories.size();j++){
+	for(unsigned int j = 0; j< trajectories.size() && j < maxIterations;j++){
+		//cout << "Calculating trajectories. Loop: " << j << endl;
 		Vec4i traj = trajectories[j];
 		trajStart = Point2f(traj[0],traj[1]);
 		trajEnd = Point2f(traj[2],traj[3]);
+
+
+		//check if white ball collides with any other
+		//cout << "Balls found: " << allBalls.size() << endl;
+		Point2f pointOnLine;
+		vector<Point2f> collisionsWhite;
+		vector<Point2f> collisionsNumbered;
+
+		for (size_t i = 0; i < allBalls.size(); i++) {
+	        Vec3i c = allBalls[i];
+			//check if this is not the ball itself
+	        //check if the distance from white ball center is bigger than radius
+			if(norm(trajStart-Point2f(c[0],c[1])) >= ballsRadius){
+
+				//if distance is < radius*2 then it collides
+				if(pointLineDistance(trajStart,trajEnd,Point2f(c[0],c[1]),pointOnLine) <= ballsRadius*2){
+					//cout << "Collision: " << i << c[0] << "," <<c[1] << endl;
+					//cout << "Projection Point on line " << pointOnLine << endl;
+
+					//check if point is on line segment, not on the back (lines are infinite)
+					float maxX = max(trajStart.x,trajEnd.x);
+					float maxY = max(trajStart.y,trajEnd.y);
+					float minX = min(trajStart.x,trajEnd.x);
+					float minY = min(trajStart.y,trajEnd.y);
+					if (pointOnLine.x < maxX && pointOnLine.x > minX &&
+						pointOnLine.y < maxY && pointOnLine.y > minY){
+						//circle(frame, Point(c[0],c[1]),ballsRadius, Scalar(255,255,255), -1, CV_AA);
+						collisionsNumbered.push_back(Point2f(c[0],c[1]));
+
+						//so here I have to apply Pitagoras do find out where was the first collision
+						float dist1 = norm(pointOnLine-Point2f(c[0],c[1]));
+						float dist2 = ballsRadius*2;
+						float dist3 = sqrt(dist2*dist2 - dist1*dist1);
+						Point2f collision;
+						collision.x = pointOnLine.x - (pointOnLine.x - trajStart.x) / norm(pointOnLine - trajStart) * dist3;
+						collision.y = pointOnLine.y - (pointOnLine.y - trajStart.y) / norm(pointOnLine - trajStart) * dist3;
+						collisionsWhite.push_back(Point2f(collision.x,collision.y));
+					}
+				}
+			}
+	    }
+
+		//check which collision is the first one
+		int closestBall = 0;
+		float dist = 99999;
+		if(collisionsWhite.size() > 0){
+			for(unsigned int i = 0; i< collisionsWhite.size() ; i++){
+				if(norm (collisionsWhite[i] - collisionsWhite[closestBall]) < dist){
+					closestBall = i;
+					dist = norm (collisionsWhite[i] - collisionsWhite[closestBall]);
+				}
+			}
+			circle(frame, collisionsWhite[closestBall], ballsRadius, Scalar(255,255,0), -1, CV_AA);
+			//circle(frame, collisionsNumbered[closestBall], ballsRadius, Scalar(255,255,0), -1, CV_AA);
+			trajEnd = collisionsWhite[closestBall];
+
+			Point2f colWhite = collisionsWhite[closestBall];
+			Point2f colNumbered = collisionsNumbered[closestBall];
+
+			if(canOnlyCollideOnce){
+				//angle between two points
+				angle = atan2(colWhite.y - colNumbered.y, colWhite.x- colNumbered.x);
+
+				x1 = colNumbered.x - 200*cos(angle);
+				y1 = colNumbered.y - 200*sin(angle);
+
+
+		    	//lines.push_back(Vec4i(colNumbered.x,colNumbered.y,x1,y1));
+		    	trajectories.push_back(Vec4i(colNumbered.x,colNumbered.y,x1,y1));
+		    	canOnlyCollideOnce = false;
+
+				//calculate the white ball new vector
+				Point2f newWhite;
+				pointLineDistance(colNumbered,Point2f(x1,y1),trajStart,newWhite);
+
+				angle = atan2(trajStart.y - newWhite.y, trajStart.x- newWhite.x);
+
+				x1 = colWhite.x - 300*cos(angle);
+				y1 = colWhite.y - 300*sin(angle);
+
+				//lines.push_back(Vec4i(colWhite.x,colWhite.y,x1,y1));
+				trajectories.push_back(Vec4i(colWhite.x,colWhite.y,x1,y1));
+			}
+		}
+
+
 		// the code below check if the ball goes into any pocket or rails
 		//prevent for loop forever
-		int maxIterations = 5;
 		Point2f holePoint;
 		hole = checkHoles(trajStart,trajEnd, holePoint);
 		if(hole > -1){
@@ -404,6 +414,8 @@ float ProjectionWindow::pointLineDistance(Point2f line1, Point2f line2, Point2f 
 	} else {
 		//vertical line
 		distance = line2.x - point.x;
+		pointOnLine.y = point.y;
+		pointOnLine.x = line1.x;
 	}
 
 	//cout << "Distance: " << distance << endl;
