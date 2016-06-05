@@ -61,6 +61,7 @@ public:
     void setCue (Vec4i cue);
     Point2f getCuePointNearWhiteBall(Vec4i tempCue);
     bool isPointInsideCircle (Point p,Vec3i c);
+    float pointLineDistance(Point2f line1, Point2f line2, Point2f point);
 };
 
 #endif // PROJECTIONWINDOW_H

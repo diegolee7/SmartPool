@@ -118,10 +118,10 @@ void ProjectionWindow::drawTrajectory(){
     int whiteBallRadius = 16;
 
     Point2f cuePoint = getCuePointNearWhiteBall(cue);
-    int cuePointX = cuePoint.x;
-    int cuePointY = cuePoint.y;
-    mouseX = cuePointX;
-    mouseY = cuePointY;
+
+    //comment two lines below to use mouse as cue
+    mouseX = cuePoint.x;
+    mouseY = cuePoint.y;
 
     mouseX = mouseX - tableRectangle.x;
     mouseX = mouseX * xProportion;
@@ -197,9 +197,9 @@ void ProjectionWindow::drawTrajectory(){
 	bool foundAllCollisions = false;
 	float delta = 0;
 	Point2f intersectionPoint;
-	Point2f trajectoryStartPoint;
-	trajectoryStartPoint.x = whiteBallX;
-	trajectoryStartPoint.y = whiteBallY;
+	Point2f trajStart;
+	trajStart.x = whiteBallX;
+	trajStart.y = whiteBallY;
 	Point2f trajectoryEndPoint;
 	trajectoryEndPoint.x = x1;
 	trajectoryEndPoint.y = y1;
@@ -209,55 +209,57 @@ void ProjectionWindow::drawTrajectory(){
 	c[1] = 200;
 	c[2] = 50;
 	//circle(frame, Point(c[0], c[1]),c[2] , Scalar(0,255,0), 3, CV_AA);
-	bool circleLine = circleLineIntersect(trajectoryStartPoint,trajectoryEndPoint,c);
+	bool circleLine = circleLineIntersect(trajStart,trajectoryEndPoint,c);
 	//cout << "Circle Line Intersection: " << circleLine <<endl;
+	pointLineDistance(trajStart,trajectoryEndPoint,Point2f(500,500));
+	//circle(frame, Point(500,500),5 , Scalar(255,255,255), 3, CV_AA);
 
 	//prevent for loop forever
 	int maxIterations = 5;
 	int hole = 0;
 	Point2f holePoint;
 	for (int i = 0; foundAllCollisions == false && i < maxIterations; i++){
-		hole = checkHoles(trajectoryStartPoint,trajectoryEndPoint, holePoint);
+		hole = checkHoles(trajStart,trajectoryEndPoint, holePoint);
 		if(hole > -1){
 			trajectoryEndPoint = holePoint;
 			//cout << "Ball is going into Hole: " << holePoint << endl;
-			lines.push_back(Vec4i(trajectoryStartPoint.x,trajectoryStartPoint.y,
+			lines.push_back(Vec4i(trajStart.x,trajStart.y,
 					trajectoryEndPoint.x,trajectoryEndPoint.y));
 			foundAllCollisions = true;
 		} else if( intersection(table.p1, table.p2,
-				trajectoryStartPoint,trajectoryEndPoint, intersectionPoint)){
-			lines.push_back(Vec4i(trajectoryStartPoint.x,trajectoryStartPoint.y,
+				trajStart,trajectoryEndPoint, intersectionPoint)){
+			lines.push_back(Vec4i(trajStart.x,trajStart.y,
 					intersectionPoint.x,intersectionPoint.y));
-			trajectoryStartPoint.x = intersectionPoint.x;
-			trajectoryStartPoint.y = intersectionPoint.y + 1;
+			trajStart.x = intersectionPoint.x;
+			trajStart.y = intersectionPoint.y + 1;
 			delta = trajectoryEndPoint.y - table.p1.y;
 			trajectoryEndPoint.y = table.p1.y - delta;
 		} else if (intersection(table.p2, table.p3,
-				trajectoryStartPoint,trajectoryEndPoint, intersectionPoint)){
-			lines.push_back(Vec4i(trajectoryStartPoint.x,trajectoryStartPoint.y,
+				trajStart,trajectoryEndPoint, intersectionPoint)){
+			lines.push_back(Vec4i(trajStart.x,trajStart.y,
 					intersectionPoint.x,intersectionPoint.y));
-			trajectoryStartPoint.x = intersectionPoint.x - 1;
-			trajectoryStartPoint.y = intersectionPoint.y;
+			trajStart.x = intersectionPoint.x - 1;
+			trajStart.y = intersectionPoint.y;
 			delta = trajectoryEndPoint.x - table.p2.x;
 			trajectoryEndPoint.x = table.p2.x - delta;
 		} else if (intersection(table.p3, table.p4,
-				trajectoryStartPoint,trajectoryEndPoint, intersectionPoint)){
-			lines.push_back(Vec4i(trajectoryStartPoint.x,trajectoryStartPoint.y,
+				trajStart,trajectoryEndPoint, intersectionPoint)){
+			lines.push_back(Vec4i(trajStart.x,trajStart.y,
 					intersectionPoint.x,intersectionPoint.y));
-			trajectoryStartPoint.x = intersectionPoint.x;
-			trajectoryStartPoint.y = intersectionPoint.y - 1;
+			trajStart.x = intersectionPoint.x;
+			trajStart.y = intersectionPoint.y - 1;
 			delta = trajectoryEndPoint.y - table.p3.y;
 			trajectoryEndPoint.y = table.p3.y - delta;
 		} else if (intersection(table.p4, table.p1,
-				trajectoryStartPoint,trajectoryEndPoint, intersectionPoint)){
-			lines.push_back(Vec4i(trajectoryStartPoint.x,trajectoryStartPoint.y,
+				trajStart,trajectoryEndPoint, intersectionPoint)){
+			lines.push_back(Vec4i(trajStart.x,trajStart.y,
 					intersectionPoint.x,intersectionPoint.y));
-			trajectoryStartPoint.x = intersectionPoint.x + 1;
-			trajectoryStartPoint.y = intersectionPoint.y;
+			trajStart.x = intersectionPoint.x + 1;
+			trajStart.y = intersectionPoint.y;
 			delta = trajectoryEndPoint.x - table.p4.x;
 			trajectoryEndPoint.x = table.p4.x - delta;
 		} else {
-			lines.push_back(Vec4i(trajectoryStartPoint.x,trajectoryStartPoint.y,
+			lines.push_back(Vec4i(trajStart.x,trajStart.y,
 					trajectoryEndPoint.x,trajectoryEndPoint.y));
 			foundAllCollisions = true;
 		}
@@ -290,6 +292,31 @@ void ProjectionWindow::drawTrajectory(){
 
     Rect tableRectangle = Rect (boardUpperLeft,boardBottomRight);
     rectangle(frame, tableRectangle, Scalar(255,0,255), 2, 8, 0);
+}
+
+float ProjectionWindow::pointLineDistance(Point2f line1, Point2f line2, Point2f point){
+	float dx = line2.x - line1.x;
+	float dy = line2.y - line1.y;
+	float distance = 0;
+
+	//not vertical line
+	if(dy != 0){
+	    // y = mx + c
+	    // intercept c = y - mx
+		float slope = dy/dx;
+		float intercept = line1.y - slope * line1.x; // which is same as y2 - slope * x2
+		// mx - y + c = 0
+		// fabsf(m*point.x + (-1)*point.y + c)/sqrt(m*m+(-1)*(-1))
+		distance =  fabsf(slope*point.x + (-1)*point.y + intercept)/
+						sqrt(slope*slope+(-1)*(-1));
+
+	} else {
+		//vertical line
+		distance = line2.x - point.x;
+	}
+	cout << "Distance: " << distance << endl;
+	return distance;
+
 }
 
 bool ProjectionWindow::circleLineIntersect(Point2f p1, Point2f p2, Vec3f circle) {
