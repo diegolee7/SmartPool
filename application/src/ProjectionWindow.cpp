@@ -112,8 +112,8 @@ void ProjectionWindow::drawTrajectory(){
     Point2f cuePoint = getCuePointNearWhiteBall(cue);
 
     //comment two lines below to use mouse as cue
-    //mouseX = cuePoint.x;
-    //mouseY = cuePoint.y;
+    mouseX = cuePoint.x;
+    mouseY = cuePoint.y;
 
     mouseX = mouseX - tableRectangle.x;
     mouseX = mouseX * xProportion;
@@ -261,7 +261,9 @@ void ProjectionWindow::drawTrajectory(){
 		}
 		circle(frame, collisionsWhite[closestBall], ballsRadius, Scalar(255,255,255), -1, CV_AA);
 		circle(frame, collisionsNumbered[closestBall], ballsRadius, Scalar(255,255,255), -1, CV_AA);
+		trajEnd = collisionsWhite[closestBall];
 	}
+
 
 	// the code below check if the ball goes into any pocket or rails
 	//prevent for loop forever
