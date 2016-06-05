@@ -206,9 +206,9 @@ void ProjectionWindow::drawTrajectory(){
 	//pointLineDistance(trajStart,trajectoryEndPoint,Point2f(500,500));
 	//circle(frame, Point(500,500),5 , Scalar(255,255,255), 3, CV_AA);
 
+
 	//check if white ball collides with any other
 	//cout << "Balls found: " << allBalls.size() << endl;
-
 	Point2f pointOnLine;
 	vector<Point2f> collisionsWhite;
 	vector<Point2f> collisionsNumbered;
@@ -286,21 +286,25 @@ void ProjectionWindow::drawTrajectory(){
 	    lines.push_back(Vec4i(colWhite.x,colWhite.y,x1,y1));
 	}
 
+	vector<Vec4i> trajectories;
+	trajectories.clear();
+	trajectories.push_back(Vec4i(trajStart.x,trajStart.y,trajEnd.x,trajEnd.y));
 
-
-	// the code below check if the ball goes into any pocket or rails
-	//prevent for loop forever
-	int maxIterations = 5;
 	int hole = 0;
-	Point2f holePoint;
-	for (int i = 0; foundAllCollisions == false && i < maxIterations; i++){
+	for(int j = 0; j< trajectories.size();j++){
+		Vec4i traj = trajectories[j];
+		trajStart = Point2f(traj[0],traj[1]);
+		trajEnd = Point2f(traj[2],traj[3]);
+		// the code below check if the ball goes into any pocket or rails
+		//prevent for loop forever
+		int maxIterations = 5;
+		Point2f holePoint;
 		hole = checkHoles(trajStart,trajEnd, holePoint);
 		if(hole > -1){
 			trajEnd = holePoint;
 			//cout << "Ball is going into Hole: " << holePoint << endl;
 			lines.push_back(Vec4i(trajStart.x,trajStart.y,
 					trajEnd.x,trajEnd.y));
-			foundAllCollisions = true;
 		} else if( intersection(table.p1, table.p2,
 				trajStart,trajEnd, intersectionPoint)){
 			lines.push_back(Vec4i(trajStart.x,trajStart.y,
@@ -309,6 +313,7 @@ void ProjectionWindow::drawTrajectory(){
 			trajStart.y = intersectionPoint.y + 1;
 			delta = trajEnd.y - table.p1.y;
 			trajEnd.y = table.p1.y - delta;
+			trajectories.push_back(Vec4i(trajStart.x,trajStart.y,trajEnd.x,trajEnd.y));
 		} else if (intersection(table.p2, table.p3,
 				trajStart,trajEnd, intersectionPoint)){
 			lines.push_back(Vec4i(trajStart.x,trajStart.y,
@@ -317,6 +322,7 @@ void ProjectionWindow::drawTrajectory(){
 			trajStart.y = intersectionPoint.y;
 			delta = trajEnd.x - table.p2.x;
 			trajEnd.x = table.p2.x - delta;
+			trajectories.push_back(Vec4i(trajStart.x,trajStart.y,trajEnd.x,trajEnd.y));
 		} else if (intersection(table.p3, table.p4,
 				trajStart,trajEnd, intersectionPoint)){
 			lines.push_back(Vec4i(trajStart.x,trajStart.y,
@@ -325,6 +331,7 @@ void ProjectionWindow::drawTrajectory(){
 			trajStart.y = intersectionPoint.y - 1;
 			delta = trajEnd.y - table.p3.y;
 			trajEnd.y = table.p3.y - delta;
+			trajectories.push_back(Vec4i(trajStart.x,trajStart.y,trajEnd.x,trajEnd.y));
 		} else if (intersection(table.p4, table.p1,
 				trajStart,trajEnd, intersectionPoint)){
 			lines.push_back(Vec4i(trajStart.x,trajStart.y,
@@ -333,10 +340,10 @@ void ProjectionWindow::drawTrajectory(){
 			trajStart.y = intersectionPoint.y;
 			delta = trajEnd.x - table.p4.x;
 			trajEnd.x = table.p4.x - delta;
+			trajectories.push_back(Vec4i(trajStart.x,trajStart.y,trajEnd.x,trajEnd.y));
 		} else {
 			lines.push_back(Vec4i(trajStart.x,trajStart.y,
 					trajEnd.x,trajEnd.y));
-			foundAllCollisions = true;
 		}
 		//cout << "Intersection: "<< foundAllCollisions << intersectionPoint << " "<< table.p1
 		//		<< table.p2 << trajectoryStartPoint << trajectoryEndPoint << endl;
