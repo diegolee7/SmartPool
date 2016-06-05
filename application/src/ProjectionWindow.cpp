@@ -112,8 +112,8 @@ void ProjectionWindow::drawTrajectory(){
     Point2f cuePoint = getCuePointNearWhiteBall(cue);
 
     //comment two lines below to use mouse as cue
-    mouseX = cuePoint.x;
-    mouseY = cuePoint.y;
+    //mouseX = cuePoint.x;
+    //mouseY = cuePoint.y;
 
     mouseX = mouseX - tableRectangle.x;
     mouseX = mouseX * xProportion;
@@ -259,10 +259,33 @@ void ProjectionWindow::drawTrajectory(){
 				dist = norm (collisionsWhite[i] - collisionsWhite[closestBall]);
 			}
 		}
-		circle(frame, collisionsWhite[closestBall], ballsRadius, Scalar(255,255,255), -1, CV_AA);
-		circle(frame, collisionsNumbered[closestBall], ballsRadius, Scalar(255,255,255), -1, CV_AA);
+		circle(frame, collisionsWhite[closestBall], ballsRadius, Scalar(255,255,0), -1, CV_AA);
+		circle(frame, collisionsNumbered[closestBall], ballsRadius, Scalar(255,255,0), -1, CV_AA);
 		trajEnd = collisionsWhite[closestBall];
+
+		Point2f colWhite = collisionsWhite[closestBall];
+		Point2f colNumbered = collisionsNumbered[closestBall];
+
+		//angle between two points
+	    angle = atan2(colWhite.y - colNumbered.y, colWhite.x- colNumbered.x);
+
+	    x1 = colNumbered.x - 200*cos(angle);
+	    y1 = colNumbered.y - 200*sin(angle);
+
+	    lines.push_back(Vec4i(colNumbered.x,colNumbered.y,x1,y1));
+
+	    //calculate the white ball new vector
+	    Point2f newWhite;
+	    pointLineDistance(colNumbered,Point2f(x1,y1),trajStart,newWhite);
+
+	    angle = atan2(trajStart.y - newWhite.y, trajStart.x- newWhite.x);
+
+	    x1 = colWhite.x - 300*cos(angle);
+	    y1 = colWhite.y - 300*sin(angle);
+
+	    lines.push_back(Vec4i(colWhite.x,colWhite.y,x1,y1));
 	}
+
 
 
 	// the code below check if the ball goes into any pocket or rails
