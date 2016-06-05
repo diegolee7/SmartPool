@@ -115,13 +115,13 @@ Point2f ProjectionWindow::getCuePointNearWhiteBall(Vec4i tempCue){
 void ProjectionWindow::drawTrajectory(){
     int whiteBallX = 0;
     int whiteBallY = 0;
-    int whiteBallRadius = 16;
+    int whiteBallRadius = ballsRadius;
 
     Point2f cuePoint = getCuePointNearWhiteBall(cue);
 
     //comment two lines below to use mouse as cue
-    mouseX = cuePoint.x;
-    mouseY = cuePoint.y;
+    //mouseX = cuePoint.x;
+    //mouseY = cuePoint.y;
 
     mouseX = mouseX - tableRectangle.x;
     mouseX = mouseX * xProportion;
@@ -209,12 +209,40 @@ void ProjectionWindow::drawTrajectory(){
 	c[1] = 200;
 	c[2] = 50;
 	//circle(frame, Point(c[0], c[1]),c[2] , Scalar(0,255,0), 3, CV_AA);
-	bool circleLine = circleLineIntersect(trajStart,trajectoryEndPoint,c);
+	//bool circleLine = circleLineIntersect(trajStart,trajectoryEndPoint,c);
 	//cout << "Circle Line Intersection: " << circleLine <<endl;
-	pointLineDistance(trajStart,trajectoryEndPoint,Point2f(500,500));
+	//pointLineDistance(trajStart,trajectoryEndPoint,Point2f(500,500));
 	//circle(frame, Point(500,500),5 , Scalar(255,255,255), 3, CV_AA);
 
+	//check if white ball collides with any other
+	int newX;
+	int newY;
+	//cout << "Balls found: " << allBalls.size() << endl;
+    for (size_t i = 0; i < allBalls.size(); i++) {
+        Vec3i c = allBalls[i];
+        newX = c[0]- tableRectangle.x;
+        newX = newX * xProportion;
+        newX += projectionRectangle.x;
+        //std::cout << "\nx: " << c[0] << "\tnew x: " << newX << endl;
+        newY = c[1]- tableRectangle.y;
+		newY = newY * yProportion;
+		newY += projectionRectangle.y;
+		//std::cout << "\ny: " << c[1] << "\tnew y: " << newX << endl;
+
+		//check if this is not the white ball itself
+		if(norm(trajStart-Point2f(newX,newY)) >= ballsRadius){
+			if(pointLineDistance(trajStart,trajectoryEndPoint,Point2f(newX,newY)) <= 32){
+				cout << "Collision: " << i << newX << "," <<newY << endl;
+				circle(frame, Point(newX,newY),ballsRadius, Scalar(255,255,255), -1, CV_AA);
+			}
+		} else {
+			cout << "White ball is: " << i << trajStart <<endl;
+		}
+    }
+
+
 	//prevent for loop forever
+	// the code below check if the ball goes into any pocket or rails
 	int maxIterations = 5;
 	int hole = 0;
 	Point2f holePoint;
@@ -286,7 +314,7 @@ void ProjectionWindow::drawTrajectory(){
 
     if (hole > -1){
     	circle(frame, Point((holes.h[hole][0].x + holes.h[hole][1].x)/2 ,
-    			(holes.h[hole][0].y + holes.h[hole][1].y)/2 ),16*4, Scalar(25,180,0), -1, CV_AA);
+    			(holes.h[hole][0].y + holes.h[hole][1].y)/2 ),ballsRadius*4, Scalar(25,180,0), -1, CV_AA);
     }
 
 
@@ -314,7 +342,7 @@ float ProjectionWindow::pointLineDistance(Point2f line1, Point2f line2, Point2f 
 		//vertical line
 		distance = line2.x - point.x;
 	}
-	cout << "Distance: " << distance << endl;
+	//cout << "Distance: " << distance << endl;
 	return distance;
 
 }

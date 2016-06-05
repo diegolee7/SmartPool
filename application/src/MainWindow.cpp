@@ -15,10 +15,10 @@ void CallBackFunc(int event, int x, int y, int flags, void* userdata)
     }
 
     else if  ( event == EVENT_LBUTTONDOWN ) {
-        cout << "Left button of the mouse is clicked - position (" << x << ", " << y << ")";
+        cout << "Left button of the mouse is clicked - position (" << x << ", " << y << ")" << endl;
     }
     else if  ( event == EVENT_RBUTTONDOWN ) {
-        cout << "Right button of the mouse is clicked - position (" << x << ", " << y << ")";
+        cout << "Right button of the mouse is clicked - position (" << x << ", " << y << ")" << endl;
         window->boardUpperLeft.x = x;
         window->boardUpperLeft.y = y;
     }

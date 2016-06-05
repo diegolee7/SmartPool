@@ -16,6 +16,7 @@ class FrameProcessor {
 
 private:
 
+	static const int ballsRadius = 16;
     Mat frameGray;
     int maxBlue;
     int maxRed;

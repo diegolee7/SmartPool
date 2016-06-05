@@ -76,6 +76,7 @@ void FrameProcessor::findCountours (Mat frame){
 	}*/
 
 	/// Get the moments
+	//cout << "Contours size: " << contours.size() << endl;
 	vector<Moments> mu(contours.size() );
 	for( unsigned int i = 0; i < contours.size(); i++ ) {
 		mu[i] = moments( contours[i], false );
@@ -93,6 +94,7 @@ void FrameProcessor::findCountours (Mat frame){
 	if(mc.size() > 0){
 		allBalls.clear();
 	}
+	//cout << "mc size: " << mc.size() << endl;
     for (size_t i = 0; i < mc.size(); i++) {
     	contourArea = mu[i].m00;
     	if(contourArea > 400 && contourArea < 1200 ){
@@ -100,10 +102,22 @@ void FrameProcessor::findCountours (Mat frame){
 			circle(frame, c, 16, Scalar(0,0,255), 1, CV_AA);
 			circle(frame, c, 2, Scalar(0,255,0), 1, CV_AA);
 			//printf("\nitem %d size: %.2f",j, mu[i].m00);
-			allBalls.push_back(Vec3f(c.x,c.y,16));
+			//cout << "Circle: " << c << endl;
+			if(!allBalls.empty()){
+				Vec3f last = allBalls.back();
+				//if last ball center is different at least 5 pixels
+				//making this to remove double balls
+				//don't know why countours behaves this way
+				if (!((last[0]-c.x < 5) && (last[1]-c.y < 5))){
+					allBalls.push_back(Vec3f(c.x,c.y,ballsRadius));
+				}
+			} else {
+				allBalls.push_back(Vec3f(c.x,c.y,ballsRadius));
+			}
 			j++;
     	}
     }
+    //cout << "All balls size: " << allBalls.size() << endl;
 
 	/// Show in a window
 	namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
