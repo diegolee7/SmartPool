@@ -51,7 +51,7 @@ public:
     Point boardUpperLeft;
     Point boardBottomRight;
     void setTableRectangle(Rect tableRectangle);
-    void setAllBalls ( vector<Vec3f> allBalls);
+    void setAllBalls ( vector<Vec3f> tempAllBalls);
     void setWhiteBalls ( vector<Vec3f> whiteBalls);
     void setMousePosition(int mouseX, int mouseY);
     void drawTrajectory();
@@ -62,7 +62,7 @@ public:
     void setCue (Vec4i cue);
     Point2f getCuePointNearWhiteBall(Vec4i tempCue);
     bool isPointInsideCircle (Point p,Vec3i c);
-    float pointLineDistance(Point2f line1, Point2f line2, Point2f point);
+    float pointLineDistance(Point2f line1, Point2f line2, Point2f point,  Point2f &pointOnLine);
 };
 
 #endif // PROJECTIONWINDOW_H

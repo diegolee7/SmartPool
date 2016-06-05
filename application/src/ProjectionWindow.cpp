@@ -51,15 +51,7 @@ void ProjectionWindow::drawAllBalls(){
 	int newY;
     for (size_t i = 0; i < allBalls.size(); i++) {
         Vec3i c = allBalls[i];
-        newX = c[0]- tableRectangle.x;
-        newX = newX * xProportion;
-        newX += projectionRectangle.x;
-        //std::cout << "\nx: " << c[0] << "\tnew x: " << newX << endl;
-        newY = c[1]- tableRectangle.y;
-		newY = newY * yProportion;
-		newY += projectionRectangle.y;
-		//std::cout << "\ny: " << c[1] << "\tnew y: " << newX << endl;
-        circle(frame, Point(newX, newY),c[2]*2 , Scalar(0,255,0), 3, CV_AA);
+        circle(frame, Point(c[0], c[1]),c[2]*2 , Scalar(0,255,0), 3, CV_AA);
     }
 
     for (size_t i = 0; i < whiteBalls.size(); i++) {
@@ -200,9 +192,9 @@ void ProjectionWindow::drawTrajectory(){
 	Point2f trajStart;
 	trajStart.x = whiteBallX;
 	trajStart.y = whiteBallY;
-	Point2f trajectoryEndPoint;
-	trajectoryEndPoint.x = x1;
-	trajectoryEndPoint.y = y1;
+	Point2f trajEnd;
+	trajEnd.x = x1;
+	trajEnd.y = y1;
 
 	Vec3f c;
 	c[0] = 500;
@@ -215,25 +207,26 @@ void ProjectionWindow::drawTrajectory(){
 	//circle(frame, Point(500,500),5 , Scalar(255,255,255), 3, CV_AA);
 
 	//check if white ball collides with any other
-	int newX;
-	int newY;
 	//cout << "Balls found: " << allBalls.size() << endl;
-    for (size_t i = 0; i < allBalls.size(); i++) {
-        Vec3i c = allBalls[i];
-        newX = c[0]- tableRectangle.x;
-        newX = newX * xProportion;
-        newX += projectionRectangle.x;
-        //std::cout << "\nx: " << c[0] << "\tnew x: " << newX << endl;
-        newY = c[1]- tableRectangle.y;
-		newY = newY * yProportion;
-		newY += projectionRectangle.y;
-		//std::cout << "\ny: " << c[1] << "\tnew y: " << newX << endl;
 
+	Point2f pointOnLine;
+
+	for (size_t i = 0; i < allBalls.size(); i++) {
+        Vec3i c = allBalls[i];
 		//check if this is not the white ball itself
-		if(norm(trajStart-Point2f(newX,newY)) >= ballsRadius){
-			if(pointLineDistance(trajStart,trajectoryEndPoint,Point2f(newX,newY)) <= 32){
-				cout << "Collision: " << i << newX << "," <<newY << endl;
-				circle(frame, Point(newX,newY),ballsRadius, Scalar(255,255,255), -1, CV_AA);
+		if(norm(trajStart-Point2f(c[0],c[1])) >= ballsRadius){
+			if(pointLineDistance(trajStart,trajEnd,Point2f(c[0],c[1]),pointOnLine) <= 32){
+				cout << "Collision: " << i << c[0] << "," <<c[1] << endl;
+				cout << "Projection Point on line " << pointOnLine << endl;
+
+				//check if point is on line segment
+				float maxX = max(trajStart.x,trajEnd.x);
+				float maxY = max(trajStart.y,trajEnd.y);
+				float minX = min(trajStart.x,trajEnd.x);
+				float minY = min(trajStart.y,trajEnd.y);
+				if (c[0] < maxX && c[0] > minX && c[1] < maxY && c[1] > minY){
+					circle(frame, Point(c[0],c[1]),ballsRadius, Scalar(255,255,255), -1, CV_AA);
+				}
 			}
 		} else {
 			cout << "White ball is: " << i << trajStart <<endl;
@@ -247,48 +240,48 @@ void ProjectionWindow::drawTrajectory(){
 	int hole = 0;
 	Point2f holePoint;
 	for (int i = 0; foundAllCollisions == false && i < maxIterations; i++){
-		hole = checkHoles(trajStart,trajectoryEndPoint, holePoint);
+		hole = checkHoles(trajStart,trajEnd, holePoint);
 		if(hole > -1){
-			trajectoryEndPoint = holePoint;
+			trajEnd = holePoint;
 			//cout << "Ball is going into Hole: " << holePoint << endl;
 			lines.push_back(Vec4i(trajStart.x,trajStart.y,
-					trajectoryEndPoint.x,trajectoryEndPoint.y));
+					trajEnd.x,trajEnd.y));
 			foundAllCollisions = true;
 		} else if( intersection(table.p1, table.p2,
-				trajStart,trajectoryEndPoint, intersectionPoint)){
+				trajStart,trajEnd, intersectionPoint)){
 			lines.push_back(Vec4i(trajStart.x,trajStart.y,
 					intersectionPoint.x,intersectionPoint.y));
 			trajStart.x = intersectionPoint.x;
 			trajStart.y = intersectionPoint.y + 1;
-			delta = trajectoryEndPoint.y - table.p1.y;
-			trajectoryEndPoint.y = table.p1.y - delta;
+			delta = trajEnd.y - table.p1.y;
+			trajEnd.y = table.p1.y - delta;
 		} else if (intersection(table.p2, table.p3,
-				trajStart,trajectoryEndPoint, intersectionPoint)){
+				trajStart,trajEnd, intersectionPoint)){
 			lines.push_back(Vec4i(trajStart.x,trajStart.y,
 					intersectionPoint.x,intersectionPoint.y));
 			trajStart.x = intersectionPoint.x - 1;
 			trajStart.y = intersectionPoint.y;
-			delta = trajectoryEndPoint.x - table.p2.x;
-			trajectoryEndPoint.x = table.p2.x - delta;
+			delta = trajEnd.x - table.p2.x;
+			trajEnd.x = table.p2.x - delta;
 		} else if (intersection(table.p3, table.p4,
-				trajStart,trajectoryEndPoint, intersectionPoint)){
+				trajStart,trajEnd, intersectionPoint)){
 			lines.push_back(Vec4i(trajStart.x,trajStart.y,
 					intersectionPoint.x,intersectionPoint.y));
 			trajStart.x = intersectionPoint.x;
 			trajStart.y = intersectionPoint.y - 1;
-			delta = trajectoryEndPoint.y - table.p3.y;
-			trajectoryEndPoint.y = table.p3.y - delta;
+			delta = trajEnd.y - table.p3.y;
+			trajEnd.y = table.p3.y - delta;
 		} else if (intersection(table.p4, table.p1,
-				trajStart,trajectoryEndPoint, intersectionPoint)){
+				trajStart,trajEnd, intersectionPoint)){
 			lines.push_back(Vec4i(trajStart.x,trajStart.y,
 					intersectionPoint.x,intersectionPoint.y));
 			trajStart.x = intersectionPoint.x + 1;
 			trajStart.y = intersectionPoint.y;
-			delta = trajectoryEndPoint.x - table.p4.x;
-			trajectoryEndPoint.x = table.p4.x - delta;
+			delta = trajEnd.x - table.p4.x;
+			trajEnd.x = table.p4.x - delta;
 		} else {
 			lines.push_back(Vec4i(trajStart.x,trajStart.y,
-					trajectoryEndPoint.x,trajectoryEndPoint.y));
+					trajEnd.x,trajEnd.y));
 			foundAllCollisions = true;
 		}
 		//cout << "Intersection: "<< foundAllCollisions << intersectionPoint << " "<< table.p1
@@ -322,7 +315,7 @@ void ProjectionWindow::drawTrajectory(){
     rectangle(frame, tableRectangle, Scalar(255,0,255), 2, 8, 0);
 }
 
-float ProjectionWindow::pointLineDistance(Point2f line1, Point2f line2, Point2f point){
+float ProjectionWindow::pointLineDistance(Point2f line1, Point2f line2, Point2f point, Point2f &pointOnLine){
 	float dx = line2.x - line1.x;
 	float dy = line2.y - line1.y;
 	float distance = 0;
@@ -338,10 +331,20 @@ float ProjectionWindow::pointLineDistance(Point2f line1, Point2f line2, Point2f 
 		distance =  fabsf(slope*point.x + (-1)*point.y + intercept)/
 						sqrt(slope*slope+(-1)*(-1));
 
+		// ax + by + c = 0;
+		// x = (b*(b*x0 - a*y0) - a*c)/(a*a+b*b)
+		// y = (a*(-b*x0 + a*y0)-b*c)/(a*a+b*b)
+		float b = -1;
+		float x = (b*(b*point.x - slope*point.y) - slope*intercept) / (slope*slope + b*b);
+		float y = (slope*(-b*point.x + slope*point.y) - b*intercept) / (slope*slope + b*b);
+		pointOnLine.x = x;
+		pointOnLine.y = y;
+
 	} else {
 		//vertical line
 		distance = line2.x - point.x;
 	}
+
 	//cout << "Distance: " << distance << endl;
 	return distance;
 
@@ -472,8 +475,23 @@ void ProjectionWindow::setTableRectangle (Rect tableRectangle){
 	this->tableRectangle = tableRectangle;
 }
 
-void ProjectionWindow::setAllBalls ( vector<Vec3f> allBalls){
-	this->allBalls = allBalls;
+void ProjectionWindow::setAllBalls ( vector<Vec3f> tempAllBalls){
+    // Draw Circles on Projection frame
+	int newX;
+	int newY;
+	allBalls.clear();
+    for (size_t i = 0; i < tempAllBalls.size(); i++) {
+        Vec3i c = tempAllBalls[i];
+        newX = c[0]- tableRectangle.x;
+        newX = newX * xProportion;
+        newX += projectionRectangle.x;
+        //std::cout << "\nx: " << c[0] << "\tnew x: " << newX << endl;
+        newY = c[1]- tableRectangle.y;
+		newY = newY * yProportion;
+		newY += projectionRectangle.y;
+		//std::cout << "\ny: " << c[1] << "\tnew y: " << newX << endl;
+		allBalls.push_back(Vec3f(newX,newY,c[2]));
+    }
 }
 
 void ProjectionWindow::setWhiteBalls ( vector<Vec3f> whiteBalls){
