@@ -210,32 +210,61 @@ void ProjectionWindow::drawTrajectory(){
 	//cout << "Balls found: " << allBalls.size() << endl;
 
 	Point2f pointOnLine;
+	vector<Point2f> collisionsWhite;
+	vector<Point2f> collisionsNumbered;
 
 	for (size_t i = 0; i < allBalls.size(); i++) {
         Vec3i c = allBalls[i];
 		//check if this is not the white ball itself
+        //check if the distance from white ball center is bigger than radius
 		if(norm(trajStart-Point2f(c[0],c[1])) >= ballsRadius){
-			if(pointLineDistance(trajStart,trajEnd,Point2f(c[0],c[1]),pointOnLine) <= 32){
+
+			//if distance is < radius*2 then it collides
+			if(pointLineDistance(trajStart,trajEnd,Point2f(c[0],c[1]),pointOnLine) <= ballsRadius*2){
 				cout << "Collision: " << i << c[0] << "," <<c[1] << endl;
 				cout << "Projection Point on line " << pointOnLine << endl;
 
-				//check if point is on line segment
+				//check if point is on line segment, not on the back (lines are infinite)
 				float maxX = max(trajStart.x,trajEnd.x);
 				float maxY = max(trajStart.y,trajEnd.y);
 				float minX = min(trajStart.x,trajEnd.x);
 				float minY = min(trajStart.y,trajEnd.y);
-				if (c[0] < maxX && c[0] > minX && c[1] < maxY && c[1] > minY){
-					circle(frame, Point(c[0],c[1]),ballsRadius, Scalar(255,255,255), -1, CV_AA);
+				if (pointOnLine.x < maxX && pointOnLine.x > minX &&
+					pointOnLine.y < maxY && pointOnLine.y > minY){
+					//circle(frame, Point(c[0],c[1]),ballsRadius, Scalar(255,255,255), -1, CV_AA);
+					collisionsNumbered.push_back(Point2f(c[0],c[1]));
+
+					//so here I have to apply Pitagoras do find out where was the first collision
+					float dist1 = norm(pointOnLine-Point2f(c[0],c[1]));
+					float dist2 = ballsRadius*2;
+					float dist3 = sqrt(dist2*dist2 - dist1*dist1);
+					Point2f collision;
+					collision.x = pointOnLine.x - (pointOnLine.x - trajStart.x) / norm(pointOnLine - trajStart) * dist3;
+					collision.y = pointOnLine.y - (pointOnLine.y - trajStart.y) / norm(pointOnLine - trajStart) * dist3;
+					collisionsWhite.push_back(Point2f(collision.x,collision.y));
 				}
 			}
 		} else {
-			cout << "White ball is: " << i << trajStart <<endl;
+			//cout << "White ball is: " << i << trajStart <<endl;
 		}
     }
 
+	//check which collision is the first one
+	int closestBall = 0;
+	float dist = 99999;
+	if(collisionsWhite.size() > 0){
+		for(int i = 0; i< collisionsWhite.size() ; i++){
+			if(norm (collisionsWhite[i] - collisionsWhite[closestBall]) < dist){
+				closestBall = i;
+				dist = norm (collisionsWhite[i] - collisionsWhite[closestBall]);
+			}
+		}
+		circle(frame, collisionsWhite[closestBall], ballsRadius, Scalar(255,255,255), -1, CV_AA);
+		circle(frame, collisionsNumbered[closestBall], ballsRadius, Scalar(255,255,255), -1, CV_AA);
+	}
 
-	//prevent for loop forever
 	// the code below check if the ball goes into any pocket or rails
+	//prevent for loop forever
 	int maxIterations = 5;
 	int hole = 0;
 	Point2f holePoint;
