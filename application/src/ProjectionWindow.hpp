@@ -21,8 +21,8 @@ private:
 		Point2f h[6][2];
 	} holes;
 
-	static const int ballsRadius = 16;
-	static const int lightOnWhiteBallSize = ballsRadius*10;
+	static const int ballsRadius = 24;
+	static const int lightOnWhiteBallSize = ballsRadius*6;
     static const int frameWidth = 1280;
     static const int frameHeight = 720;
     static const string windowProjectionName;
@@ -41,6 +41,7 @@ private:
 	void startProjectionScaleAndHoles();
 	Vec3i whiteBallLightArea;
 	bool cueNearWhiteBall = false;
+	bool whiteBallFound = false;
 
 public:
     ProjectionWindow();
