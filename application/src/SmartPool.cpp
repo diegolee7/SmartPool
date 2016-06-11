@@ -17,14 +17,14 @@ SmartPool::SmartPool(){
 void SmartPool::init() {
 
     // get your home directory
-    string homedir = getenv("HOME");
+    //string homedir = getenv("HOME");
 
     // Read the video stream
     VideoCapture capture;
     //capture.open(homedir.append(videoPathAfterHomeDir).append(videoName));
-    //capture.open(cameraDevice);
+    capture.open(cameraDevice);
     //capture.open("/Dropbox/Oficinas de Integração 3/images_videos/SmartPool_ap.ogv");
-    capture.open(homedir.append(videoPathAfterHomeDir).append("SmartPool_ap.ogv"));
+    //capture.open(homedir.append(videoPathAfterHomeDir).append("SmartPool_ap.ogv"));
 
     if (capture.isOpened()) {
         capture.set(CV_CAP_PROP_FRAME_WIDTH, frameWidth);

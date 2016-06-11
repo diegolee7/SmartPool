@@ -21,7 +21,7 @@ private:
     static const int frameHeight = 720;
 
     // camera device /dev/video1
-    static const int cameraDevice = 1;
+    static const int cameraDevice = 0;
 
     //video path
     static const string videoPathAfterHomeDir;

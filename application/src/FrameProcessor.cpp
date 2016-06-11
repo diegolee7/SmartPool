@@ -8,7 +8,7 @@
 FrameProcessor::FrameProcessor() {
 
     showBalls = false;
-    pMOG2 = createBackgroundSubtractorMOG2();
+    	pMOG2 = createBackgroundSubtractorMOG2();
     maxRed = 0;
     maxBlue = 0;
     maxGreen = 0;
@@ -99,7 +99,7 @@ void FrameProcessor::findCountours (Mat frame){
     	contourArea = mu[i].m00;
     	if(contourArea > 400 && contourArea < 1200 ){
 			Point2f c = mc[i];
-			circle(frame, c, 16, Scalar(0,0,255), 1, CV_AA);
+			circle(frame, c, 16, Scalar(0,0,255), 2, CV_AA);
 			circle(frame, c, 2, Scalar(0,255,0), 1, CV_AA);
 			//printf("\nitem %d size: %.2f",j, mu[i].m00);
 			//cout << "Circle: " << c << endl;
@@ -161,14 +161,14 @@ Vec4i FrameProcessor::findLine(Mat frame) {
 	cvtColor( dst, color_dst, CV_GRAY2BGR );
 	HoughLinesP( dst, lines, 1, CV_PI/180, 50, 30, 10 );
 
-	Vec4i cue;
+	Vec4i cue = Vec4i(0,0,1,1);
     if(lines.size()>=2) {
         //line( color_dst, Point(lines[0][0], lines[0][1]),Point(lines[0][2], lines[0][3]), Scalar(0,0,255), 3, 8 );
         for( size_t i = 1; i < lines.size(); i++ ) {
             if(angle(lines[0], lines[i][0], lines[i][1])>30){
                 Point p1 = mean(lines[0][0],lines[0][1],lines[i][0], lines[i][1]);
                 Point p2 = mean(lines[0][2], lines[0][3],lines[i][2], lines[i][3]);
-                //cue = Vec4i(p1[0],p1[1],p2[0],p2[1]);
+                //cue = Vec4i(p1.x,p1.y,p2.x,p2.y);
                 line( color_dst, p1, p2, Scalar(0,0,255), 3, 8 );
                 cue[0] = p1.x;
                 cue[1] = p1.y;
@@ -184,6 +184,18 @@ Vec4i FrameProcessor::findLine(Mat frame) {
 
 	namedWindow( "Detected Lines", 1 );
 	imshow( "Detected Lines", color_dst );
+
+	/*
+	// show frame with all lines found
+	Mat allLines;
+	cvtColor( dst, allLines, CV_GRAY2BGR );
+	for( size_t i = 1; i < lines.size(); i++ ) {
+		line( allLines, Point(lines[i][0], lines[i][1]),Point(lines[i][2], lines[i][3]), Scalar(0,0,255), 3, 8 );
+	}
+	namedWindow( "All Detected Lines", 1 );
+	imshow( "All Detected Lines", allLines );
+	*/
+
 	return cue;
 }
 

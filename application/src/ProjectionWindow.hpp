@@ -40,6 +40,7 @@ private:
 	Vec4i cue;
 	void startProjectionScaleAndHoles();
 	Vec3i whiteBallLightArea;
+	bool cueNearWhiteBall = false;
 
 public:
     ProjectionWindow();

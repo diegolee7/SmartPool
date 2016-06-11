@@ -14,10 +14,10 @@ ProjectionWindow::ProjectionWindow() {
     setWindowProperty(windowProjectionName, WND_PROP_FULLSCREEN, CV_WINDOW_AUTOSIZE);
     frame = Mat(frameHeight, frameWidth, CV_8UC3, Scalar(0,0,0));
 
-    boardUpperLeft.x = 249;
-	boardUpperLeft.y = 113;
-	boardBottomRight.x = 1210;
-	boardBottomRight.y = 637;
+    boardUpperLeft.x = 86;
+	boardUpperLeft.y = 35;
+	boardBottomRight.x = 1180;
+	boardBottomRight.y = 700;
 	xProportion = 1;
 	yProportion = 1;
 	mouseY = 0;
@@ -49,10 +49,6 @@ void ProjectionWindow::drawAllBalls(){
     // Draw Circles on Projection frame
 	int newX;
 	int newY;
-    for (size_t i = 0; i < allBalls.size(); i++) {
-        Vec3i c = allBalls[i];
-        circle(frame, Point(c[0], c[1]),c[2]*2 , Scalar(0,255,0), 3, CV_AA);
-    }
 
     for (size_t i = 0; i < whiteBalls.size(); i++) {
         Vec3i c = whiteBalls[i];
@@ -64,19 +60,31 @@ void ProjectionWindow::drawAllBalls(){
 		newY = newY * yProportion;
 		newY += projectionRectangle.y;
 		//std::cout << "\ny: " << c[1] << "\tnew y: " << newX << endl;
-        circle(frame, Point(newX, newY),lightOnWhiteBallSize, Scalar(0,255,0), -1, CV_AA);
+        circle(frame, Point(newX, newY),lightOnWhiteBallSize, Scalar(255,255,0), -1, CV_AA);
         whiteBallLightArea[0] = newX;
         whiteBallLightArea[1] = newY;
         whiteBallLightArea[2] = lightOnWhiteBallSize;
 
     }
+
+    int whiteBallIndex = 0;
+    for (size_t i = 0; i < allBalls.size(); i++) {
+    	Vec3i c = allBalls[i];
+    	if(norm (Point(newX,newY) - Point (c[0],c[1])) < ballsRadius){
+    		whiteBallIndex = i;
+    	} else {
+			circle(frame, Point(c[0], c[1]),c[2]*2 , Scalar(0,255,0), 3, CV_AA);
+    	}
+    }
+    allBalls.erase(allBalls.begin()+whiteBallIndex);
 }
 
 bool ProjectionWindow::isPointInsideCircle(Point p,Vec3i c){
 	//cout << p << c << endl;
 	//cout << pow(c[2],2) << endl;
 	//cout << pow(p.x-c[0],2) + pow(p.y - c[1],2) << endl;
-	return (pow(c[2],2) > pow(p.x-c[0],2) + pow(p.y - c[1],2));
+	cueNearWhiteBall = (pow(c[2],2) > pow(p.x-c[0],2) + pow(p.y - c[1],2));
+	return cueNearWhiteBall;
 }
 
 void ProjectionWindow::drawBoard(){
@@ -88,9 +96,14 @@ void ProjectionWindow::drawBoard(){
 
 Point2f ProjectionWindow::getCuePointNearWhiteBall(Vec4i tempCue){
 	//cout << "Cue: " << cue << endl;
-	Vec3i ball = whiteBalls[0];
-	int whiteBallX = ball[0];
-	int whiteBallY = ball[1];
+	Vec3i ball;
+	int whiteBallX = 1;
+	int whiteBallY = 1;
+	if(whiteBalls.size() > 0){
+		ball = whiteBalls[0];
+		whiteBallX = ball[0];
+		whiteBallY = ball[1];
+	}
 
 	Point2f a(whiteBallX,whiteBallY);
 	Point2f b(tempCue[0],tempCue[1]);
@@ -205,7 +218,7 @@ void ProjectionWindow::drawTrajectory(){
 	//pointLineDistance(trajStart,trajectoryEndPoint,Point2f(500,500));
 	//circle(frame, Point(500,500),5 , Scalar(255,255,255), 3, CV_AA);
 
-	bool canOnlyCollideOnce = true;
+	int maxCollisionsCounter = 2;
 
 	//prevent loop forever
 	unsigned int maxIterations = 5;
@@ -228,11 +241,13 @@ void ProjectionWindow::drawTrajectory(){
 		vector<Point2f> collisionsWhite;
 		vector<Point2f> collisionsNumbered;
 
-		for (size_t i = 0; i < allBalls.size(); i++) {
-	        Vec3i c = allBalls[i];
+		for (unsigned int i = 0; i < allBalls.size() && allBalls.size() < 20; i++) {
+	        cout << "ERRO FDP: " << allBalls.size();
+			Vec3i c = allBalls[i];
+			cout << "ERRO FDP" << endl;
 			//check if this is not the ball itself
 	        //check if the distance from white ball center is bigger than radius
-			if(norm(trajStart-Point2f(c[0],c[1])) >= ballsRadius){
+			if(norm(trajStart-Point2f(c[0],c[1])) >= ballsRadius/2){
 
 				//if distance is < radius*2 then it collides
 				if(pointLineDistance(trajStart,trajEnd,Point2f(c[0],c[1]),pointOnLine) <= ballsRadius*2){
@@ -272,24 +287,25 @@ void ProjectionWindow::drawTrajectory(){
 					dist = norm (collisionsWhite[i] - collisionsWhite[closestBall]);
 				}
 			}
-			circle(frame, collisionsWhite[closestBall], ballsRadius, Scalar(255,255,0), -1, CV_AA);
-			//circle(frame, collisionsNumbered[closestBall], ballsRadius, Scalar(255,255,0), -1, CV_AA);
+			//Scalar colors[4] = {Scalar(255,255,255),Scalar(180,230,0),Scalar(230,180,0),Scalar(150,255,0)};
+			circle(frame, collisionsWhite[closestBall], ballsRadius, Scalar(255,255,255), -1, CV_AA);
+			circle(frame, collisionsNumbered[closestBall], ballsRadius, Scalar(255,255,100				), -1, CV_AA);
 			trajEnd = collisionsWhite[closestBall];
 
 			Point2f colWhite = collisionsWhite[closestBall];
 			Point2f colNumbered = collisionsNumbered[closestBall];
 
-			if(canOnlyCollideOnce){
+			if(maxCollisionsCounter){
 				//angle between two points
 				angle = atan2(colWhite.y - colNumbered.y, colWhite.x- colNumbered.x);
 
-				x1 = colNumbered.x - 200*cos(angle);
-				y1 = colNumbered.y - 200*sin(angle);
+				x1 = colNumbered.x - 300*cos(angle);
+				y1 = colNumbered.y - 300*sin(angle);
 
 
 		    	//lines.push_back(Vec4i(colNumbered.x,colNumbered.y,x1,y1));
 		    	trajectories.push_back(Vec4i(colNumbered.x,colNumbered.y,x1,y1));
-		    	canOnlyCollideOnce = false;
+		    	maxCollisionsCounter--;
 
 				//calculate the white ball new vector
 				Point2f newWhite;
@@ -297,8 +313,8 @@ void ProjectionWindow::drawTrajectory(){
 
 				angle = atan2(trajStart.y - newWhite.y, trajStart.x- newWhite.x);
 
-				x1 = colWhite.x - 300*cos(angle);
-				y1 = colWhite.y - 300*sin(angle);
+				x1 = colWhite.x - 400*cos(angle);
+				y1 = colWhite.y - 400*sin(angle);
 
 				//lines.push_back(Vec4i(colWhite.x,colWhite.y,x1,y1));
 				trajectories.push_back(Vec4i(colWhite.x,colWhite.y,x1,y1));
@@ -378,7 +394,7 @@ void ProjectionWindow::drawTrajectory(){
 
     if (hole > -1){
     	circle(frame, Point((holes.h[hole][0].x + holes.h[hole][1].x)/2 ,
-    			(holes.h[hole][0].y + holes.h[hole][1].y)/2 ),ballsRadius*4, Scalar(25,180,0), -1, CV_AA);
+    			(holes.h[hole][0].y + holes.h[hole][1].y)/2 ),ballsRadius*4, Scalar(25,240,0), -1, CV_AA);
     }
 
 
@@ -549,6 +565,9 @@ void ProjectionWindow::setTableRectangle (Rect tableRectangle){
 }
 
 void ProjectionWindow::setAllBalls ( vector<Vec3f> tempAllBalls){
+	/*if(cueNearWhiteBall){
+		return;
+	}*/
     // Draw Circles on Projection frame
 	int newX;
 	int newY;
@@ -568,6 +587,9 @@ void ProjectionWindow::setAllBalls ( vector<Vec3f> tempAllBalls){
 }
 
 void ProjectionWindow::setWhiteBalls ( vector<Vec3f> whiteBalls){
+	/*if(cueNearWhiteBall){
+		return;
+	}*/
 	if(whiteBalls.size() > 0){
 		this->whiteBalls = whiteBalls;
 	} else {
@@ -585,7 +607,7 @@ void ProjectionWindow::setMousePosition(int mouseX, int mouseY){
 
 void ProjectionWindow::setCue(Vec4i cue){
 
-	Point2f cuePoint = getCuePointNearWhiteBall(cue);
+  	Point2f cuePoint = getCuePointNearWhiteBall(cue);
     int cuePointX = cuePoint.x;
     int cuePointY = cuePoint.y;
     mouseX = cuePointX;

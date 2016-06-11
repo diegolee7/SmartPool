@@ -43,10 +43,10 @@ void ControlWindow::initControlWindow(){
 
     //initialize inRange threshold trackbars
     minHue = 60;
-    maxHue = 90;
-    minSaturation = 77;
+    maxHue = 83;
+    minSaturation = 67	;
     maxSaturation = 255;
-    minValue = 133;
+    minValue = 95;
     maxValue = 255;
 
     // Attach HoughCircles trackbars
