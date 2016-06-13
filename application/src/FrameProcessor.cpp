@@ -150,33 +150,96 @@ float FrameProcessor::angle(Vec4i line, int x, int y){
     y1 = line[3] - line[1];
     y2 = y - line[1];
 
-    int aux = ((x1*x2) + (y1*y2))/(sqrt((x1*x1) + (y1*y1)) * sqrt((x2*x2) + (y2*y2)));
+    float aux = ((x1*x2) + (y1*y2))/(sqrt((x1*x1) + (y1*y1)) * sqrt((x2*x2) + (y2*y2)));
     return acos(aux)*180/PI;
+}
+
+
+void quickSort(vector<Vec4i> *lines, int esquerda, int direita){
+    int i, j;
+    double x;
+    Vec4i y;
+    i = esquerda;
+    j = direita;
+    int index = (esquerda + direita) / 2;
+    x = norm(Point2f(lines->at(index)[0],lines->at(index)[1])-Point2f(lines->at(index)[2],lines->at(index)[3]));
+
+
+    while(i <= j){
+        double test1 = norm(Point2f(lines->at(i)[0],lines->at(i)[1])-Point2f(lines->at(i)[2],lines->at(i)[3]));
+        while(test1 < x && i < direita){
+            i++;
+            test1 = norm(Point2f(lines->at(i)[0],lines->at(i)[1])-Point2f(lines->at(i)[2],lines->at(i)[3]));
+        }
+        double test2 = norm(Point2f(lines->at(j)[0],lines->at(j)[1])-Point2f(lines->at(j)[2],lines->at(j)[3]));
+        while(test2 > x && j > esquerda){
+            j--;
+            test2 = norm(Point2f(lines->at(j)[0],lines->at(j)[1])-Point2f(lines->at(j)[2],lines->at(j)[3]));
+        }
+        if(i <= j){
+            y = lines->at(i);
+            lines->at(i) = lines->at(j);
+            lines->at(j) = y;
+            i++;
+            j--;
+        }
+    }
+    if(j > esquerda){
+        quickSort(lines, esquerda, j);
+    }
+    if(i < direita){
+        quickSort(lines,  i, direita);
+    }
+
+    //Codigo pra debug
+    /*if(esquerda == 0 && direita == lines->size()-1){
+        for( size_t i = 0; i < lines->size(); i++ ) {
+            printf("tam%d: %f\n" ,i ,norm(Point2f(lines->at(i)[0],lines->at(i)[1])-Point2f(lines->at(i)[2],lines->at(i)[3])));
+        }
+    }*/
 }
 
 Vec4i FrameProcessor::findLine(Mat frame) {
 	Mat dst, color_dst;
 	vector<Vec4i> lines;
+
 	Canny( frame, dst, 50, 200, 3 );
 	cvtColor( dst, color_dst, CV_GRAY2BGR );
 	HoughLinesP( dst, lines, 1, CV_PI/180, 50, 30, 10 );
 
 	Vec4i cue = Vec4i(0,0,1,1);
-    if(lines.size()>=2) {
-        //line( color_dst, Point(lines[0][0], lines[0][1]),Point(lines[0][2], lines[0][3]), Scalar(0,0,255), 3, 8 );
-        for( size_t i = 1; i < lines.size(); i++ ) {
-            if(angle(lines[0], lines[i][0], lines[i][1])>70 && angle(lines[0], lines[i][0], lines[i][1])<110){
-                Point p1 = mean(lines[0][0],lines[0][1],lines[i][0], lines[i][1]);
-                Point p2 = mean(lines[0][2], lines[0][3],lines[i][2], lines[i][3]);
-                //cue = Vec4i(p1.x,p1.y,p2.x,p2.y);
+
+	int n_lines = lines.size();
+    if(n_lines>=2) {
+        quickSort(&lines, 0, n_lines-1);
+        int pivot = n_lines-1;
+        for( int i = pivot-1; i >=0 ; i-- ) {
+
+            double res1 = norm(Point2f(lines[pivot][0],lines[pivot][1])-Point2f(lines[i][0],lines[i][1]));
+            double res2 = norm(Point2f(lines[pivot][2],lines[pivot][3])-Point2f(lines[i][2],lines[i][3]));
+            double ang = angle(lines[pivot], lines[i][0], lines[i][1]);
+
+            //Codigo pra Debug
+            //printf("ang: %f,res1: %f,res2: %f, tam%d: %f,n: %d\n", ang, res1, res2,i, norm(Point2f(lines[i][0],lines[i][1])-Point2f(lines[i][2],lines[i][3])), lines.size());
+            /*
+            Mat test;
+            color_dst.copyTo(test);
+            line( test, Point(lines[pivot][0],lines[pivot][1]), Point(lines[pivot][2], lines[pivot][3]), Scalar(0,255,0), 3, 8 );
+            line( test, Point(lines[i][0],lines[i][1]), Point(lines[i][2], lines[i][3]), Scalar(255,0,255), 3, 8 );
+
+            imshow("test", test);
+            waitKey(10);*/
+
+            if(ang>10 && ang<170 && res1 > 10 && res2 > 10){
+                Point p1 = mean(lines[pivot][0],lines[pivot][1],lines[i][0], lines[i][1]);
+                Point p2 = mean(lines[pivot][2], lines[pivot][3],lines[i][2], lines[i][3]);
+                line( color_dst, Point(lines[pivot][0],lines[pivot][1]), Point(lines[pivot][2], lines[pivot][3]), Scalar(255,0,255), 3, 8 );
+                line( color_dst, Point(lines[i][0],lines[i][1]), Point(lines[i][2], lines[i][3]), Scalar(255,0,255), 3, 8 );
                 line( color_dst, p1, p2, Scalar(0,0,255), 1, 8 );
                 cue[0] = p1.x;
                 cue[1] = p1.y;
                 cue[2] = p2.x;
                 cue[3] = p2.y;
-                //line( color_dst, Point(lines[i][0], lines[i][1]),Point(lines[i][2], lines[i][3]), Scalar(0,0,255), 3, 8 );
-                //line( color_dst, Point(lines[0][0], lines[0][1]),Point(lines[i][0], lines[i][1]), Scalar(0,0,255), 3, 8 );
-                //line( color_dst, Point(lines[0][2], lines[0][3]),Point(lines[i][2], lines[i][3]), Scalar(0,0,255), 3, 8 );
                 break;
             }
         }
@@ -185,16 +248,17 @@ Vec4i FrameProcessor::findLine(Mat frame) {
 	namedWindow( "Detected Lines", 1 );
 	imshow( "Detected Lines", color_dst );
 
-	/*
+    //waitKey(200);
 	// show frame with all lines found
+	/*
 	Mat allLines;
 	cvtColor( dst, allLines, CV_GRAY2BGR );
 	for( size_t i = 1; i < lines.size(); i++ ) {
-		line( allLines, Point(lines[i][0], lines[i][1]),Point(lines[i][2], lines[i][3]), Scalar(0,0,255), 3, 8 );
+		line( allLines, Point(lines[i][0], lines[i][1]),Point(lines[i][2], lines[i][3]), Scalar(0,0,255), 2, 8 );
 	}
 	namedWindow( "All Detected Lines", 1 );
-	imshow( "All Detected Lines", allLines );
-	*/
+	imshow( "All Detected Lines", allLines );*/
+
 
 	return cue;
 }

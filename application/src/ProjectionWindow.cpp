@@ -242,9 +242,9 @@ void ProjectionWindow::drawTrajectory(){
 		vector<Point2f> collisionsNumbered;
 
 		for (unsigned int i = 0; i < allBalls.size() && allBalls.size() < 20; i++) {
-	        cout << "ERRO FDP: " << allBalls.size();
+	        //cout << "ERRO FDP: " << allBalls.size();
 			Vec3i c = allBalls[i];
-			cout << "ERRO FDP" << endl;
+			//cout << "ERRO FDP" << endl;
 			//check if this is not the ball itself
 	        //check if the distance from white ball center is bigger than radius
 			if(norm(trajStart-Point2f(c[0],c[1])) >= ballsRadius/2){
@@ -300,7 +300,7 @@ void ProjectionWindow::drawTrajectory(){
 				angle = atan2(colWhite.y - colNumbered.y, colWhite.x- colNumbered.x);
 
 				x1 = colNumbered.x - 500*cos(angle);
-				y1 = colNumbered.y - 500cc*sin(angle);
+				y1 = colNumbered.y - 500*sin(angle);
 
 
 		    	//lines.push_back(Vec4i(colNumbered.x,colNumbered.y,x1,y1));
@@ -620,11 +620,11 @@ void ProjectionWindow::setCue(Vec4i cue2){
     mouseY2 += projectionRectangle.y;
 
     if (isPointInsideCircle(Point(mouseX2,mouseY2),whiteBallLightArea)){
-    	cout << "test" << endl;
+    	//cout << "test" << endl;
     	//cout << "Cue outside white ball light area" << endl;
     	this->cue = cue2;
     } else {
-    	cout << "FORAAAAAAAAA" << endl;
+    	//cout << "FORAAAAAAAAA" << endl;
     }
 
     return;
