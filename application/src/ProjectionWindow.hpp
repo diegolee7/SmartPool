@@ -21,7 +21,7 @@ private:
 		Point2f h[6][2];
 	} holes;
 
-	static const int ballsRadius = 24;
+	static const int ballsRadius = 25;
 	static const int lightOnWhiteBallSize = ballsRadius*6;
     static const int frameWidth = 1280;
     static const int frameHeight = 720;

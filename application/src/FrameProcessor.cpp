@@ -8,7 +8,7 @@
 FrameProcessor::FrameProcessor() {
 
     showBalls = false;
-    	pMOG2 = createBackgroundSubtractorMOG2();
+    //pMOG2 = createBackgroundSubtractorMOG2();
     maxRed = 0;
     maxBlue = 0;
     maxGreen = 0;
@@ -484,7 +484,7 @@ void FrameProcessor::findMostFrequentColor (Mat frame) {
 Vec4i FrameProcessor::findCue(Mat frame){
     Mat frameThresholded;
 
-    inRange(frame, Scalar(240,240,240)
+    inRange(frame, Scalar(230,230,230)
            ,Scalar(255, 255, 255), frameThresholded);
 
     //morphological opening (removes small objects from the foreground)

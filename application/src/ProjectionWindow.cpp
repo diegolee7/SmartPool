@@ -2,6 +2,8 @@
 #include <iostream>
 #include <cmath>
 
+#define PI 3.14159265
+
 #define _USE_MATH_DEFINES
 
 const string ProjectionWindow::windowProjectionName = "Projection";
@@ -14,10 +16,10 @@ ProjectionWindow::ProjectionWindow() {
     setWindowProperty(windowProjectionName, WND_PROP_FULLSCREEN, CV_WINDOW_AUTOSIZE);
     frame = Mat(frameHeight, frameWidth, CV_8UC3, Scalar(0,0,0));
 
-    boardUpperLeft.x = 86;
-	boardUpperLeft.y = 35;
-	boardBottomRight.x = 1180;
-	boardBottomRight.y = 700;
+    boardUpperLeft.x = 180;
+	boardUpperLeft.y = 109;
+	boardBottomRight.x = 1129;
+	boardBottomRight.y = 622;
 	xProportion = 1;
 	yProportion = 1;
 	mouseY = 0;
@@ -29,15 +31,22 @@ ProjectionWindow::ProjectionWindow() {
     createTrackbar("y2", windowControlName, &boardBottomRight.y, 2000);
     cue = {0,0,0,0};
 
+    whiteBalls.push_back(Vec3f(1,1,1));
+
 }
 
 void ProjectionWindow::showWindow(){
 
 	//cout << "Cue: "<< cue << endl;
+	cout << "Starting projection" << endl;
 	startProjectionScaleAndHoles();
+	cout << "Clear Frame" << endl;
     clearFrame();
+    cout << "Draw Board" << endl;
     drawBoard();
+    cout << "Draw all balls" << endl;
     drawAllBalls();
+    cout << "Draw Trajectory" << endl;
     drawTrajectory();
     imshow(windowProjectionName, frame);
 }
@@ -50,6 +59,7 @@ void ProjectionWindow::drawAllBalls(){
 	int newX;
 	int newY;
 
+	cout << "Draw White Ball" << endl;
     for (size_t i = 0; i < whiteBalls.size(); i++) {
         Vec3i c = whiteBalls[i];
         newX = c[0]- tableRectangle.x;
@@ -60,14 +70,15 @@ void ProjectionWindow::drawAllBalls(){
 		newY = newY * yProportion;
 		newY += projectionRectangle.y;
 		//std::cout << "\ny: " << c[1] << "\tnew y: " << newX << endl;
-        circle(frame, Point(newX, newY),lightOnWhiteBallSize, Scalar(50,0,0), -1, CV_AA);
+        circle(frame, Point(newX, newY),lightOnWhiteBallSize, Scalar(80,0,0), -1, CV_AA);
         whiteBallLightArea[0] = newX;
         whiteBallLightArea[1] = newY;
         whiteBallLightArea[2] = lightOnWhiteBallSize;
 
     }
 
-    int whiteBallIndex = 0;
+    cout << "Draw All Balls: "<<allBalls.size() << endl;
+    int whiteBallIndex = -1;
     for (size_t i = 0; i < allBalls.size(); i++) {
     	Vec3i c = allBalls[i];
     	if(norm (Point(newX,newY) - Point (c[0],c[1])) < ballsRadius){
@@ -76,7 +87,12 @@ void ProjectionWindow::drawAllBalls(){
 			circle(frame, Point(c[0], c[1]),c[2]*2 , Scalar(0,250,0), 3, CV_AA);
     	}
     }
-    allBalls.erase(allBalls.begin()+whiteBallIndex);
+    cout << "Delete White Ball" << endl;
+    if(whiteBallIndex > -1){
+    	allBalls.erase(allBalls.begin()+whiteBallIndex);
+    }
+
+    //circle(frame, Point(400, 400), 27 , Scalar(255,250,255), -1, CV_AA);
 }
 
 bool ProjectionWindow::isPointInsideCircle(Point p,Vec3i c){
@@ -185,7 +201,7 @@ void ProjectionWindow::drawTrajectory(){
     // if it's 0 we can't divide per 0
 /*
 	if(x1 - whiteBallX != 0){
-		double slope = double(y1 - whiteBallY)/ (x1 - whiteBallX);
+		double slope = double(y1 - whiteBallY)/ (x1 - whiteBallX)
 		cout << "Slope: " << slope << endl;
 		if(x1 < projectionRectangle.x) {
 			int y2 = int(slope *(projectionRectangle.x - whiteBallX) + whiteBallY);
@@ -313,8 +329,8 @@ void ProjectionWindow::drawTrajectory(){
 
 				angle = atan2(trajStart.y - newWhite.y, trajStart.x- newWhite.x);
 
-				x1 = colWhite.x - 700*cos(angle);
-				y1 = colWhite.y - 700*sin(angle);
+				x1 = colWhite.x - 300*cos(angle);
+				y1 = colWhite.y - 300*sin(angle);
 
 				//lines.push_back(Vec4i(colWhite.x,colWhite.y,x1,y1));
 				trajectories.push_back(Vec4i(colWhite.x,colWhite.y,x1,y1));
@@ -563,9 +579,9 @@ void ProjectionWindow::setTableRectangle (Rect tableRectangle){
 }
 
 void ProjectionWindow::setAllBalls ( vector<Vec3f> tempAllBalls){
-	/*if(cueNearWhiteBall){
+	if(!whiteBallFound){
 		return;
-	}*/
+	}
     // Draw Circles on Projection frame
 	int newX;
 	int newY;
@@ -584,12 +600,21 @@ void ProjectionWindow::setAllBalls ( vector<Vec3f> tempAllBalls){
     }
 }
 
-void ProjectionWindow::setWhiteBalls ( vector<Vec3f> whiteBalls){
-	/*if(cueNearWhiteBall){
-		return;
-	}*/
-	if(whiteBalls.size() > 0 && !whiteBallFound){
-		this->whiteBalls = whiteBalls;
+void ProjectionWindow::setWhiteBalls ( vector<Vec3f> tempWhiteBalls){
+//	if(cueNearWhiteBall){
+//		return;
+//	}
+	int newX, newY;
+	float distanceLastLocation = 0;
+    for (size_t i = 0; i < tempWhiteBalls.size() &&  i < whiteBalls.size(); i++) {
+    	Vec3i c = tempWhiteBalls[i];
+    	Vec3i whiteLast = whiteBalls[0];
+		distanceLastLocation = norm (Point(c[0],c[1]) - Point (whiteLast[0],whiteLast[1]));
+    }
+
+    cout << "Distance: " << distanceLastLocation << endl;
+	if(tempWhiteBalls.size() > 0 && !whiteBallFound && distanceLastLocation > 5){
+		this->whiteBalls = tempWhiteBalls;
 		whiteBallFound = true;
 	} else {
 		whiteBallFound = false;
@@ -603,6 +628,18 @@ void ProjectionWindow::setWhiteBalls ( vector<Vec3f> whiteBalls){
 void ProjectionWindow::setMousePosition(int mouseX, int mouseY){
 	this->mouseX = mouseX;
 	this->mouseY = mouseY;
+}
+
+float angle(Vec4i line, int x, int y){
+    int x1,x2,y1,y2;
+    x1 = line[2] - line[0];
+    x2 = x - line[0];
+
+    y1 = line[3] - line[1];
+    y2 = y - line[1];
+
+    float aux = ((x1*x2) + (y1*y2))/(sqrt((x1*x1) + (y1*y1)) * sqrt((x2*x2) + (y2*y2)));
+    return acos(aux)*180/PI;
 }
 
 void ProjectionWindow::setCue(Vec4i cue2){
@@ -619,7 +656,19 @@ void ProjectionWindow::setCue(Vec4i cue2){
     mouseY2 = mouseY2 * yProportion;
     mouseY2 += projectionRectangle.y;
 
-    if (isPointInsideCircle(Point(mouseX2,mouseY2),whiteBallLightArea)){
+    bool testAngle = false;
+    if(cue[0]==0 && cue[1]==0 && cue[2]==0 && cue[3] == 0)
+    	testAngle = true;
+    else{
+    	Vec4i line = Vec4i(0,0,1,0);
+        float cue_angle = angle(line, cue[2]-cue[0], cue[3]-cue[1]);
+        float cue_angle2 = angle(line, cue2[2]-cue2[0], cue2[3]-cue2[1]);
+    	if(cue_angle2 > cue_angle-0.5 && cue_angle2 < cue_angle+0.5)
+    		testAngle = false;
+    	else
+    		testAngle = true;
+    }
+    if (isPointInsideCircle(Point(mouseX2,mouseY2),whiteBallLightArea) && testAngle){
     	//cout << "test" << endl;
     	//cout << "Cue outside white ball light area" << endl;
     	this->cue = cue2;
