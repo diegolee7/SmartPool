@@ -16,10 +16,10 @@ ProjectionWindow::ProjectionWindow() {
     setWindowProperty(windowProjectionName, WND_PROP_FULLSCREEN, CV_WINDOW_AUTOSIZE);
     frame = Mat(frameHeight, frameWidth, CV_8UC3, Scalar(0,0,0));
 
-    boardUpperLeft.x = 180;
-	boardUpperLeft.y = 109;
-	boardBottomRight.x = 1129;
-	boardBottomRight.y = 622;
+    boardUpperLeft.x = 175;
+	boardUpperLeft.y = 113;
+	boardBottomRight.x = 1160;
+	boardBottomRight.y = 654;
 	xProportion = 1;
 	yProportion = 1;
 	mouseY = 0;
@@ -613,7 +613,7 @@ void ProjectionWindow::setWhiteBalls ( vector<Vec3f> tempWhiteBalls){
     }
 
     cout << "Distance: " << distanceLastLocation << endl;
-	if(tempWhiteBalls.size() > 0 && !whiteBallFound && distanceLastLocation > 5){
+	if(tempWhiteBalls.size() > 0 && !whiteBallFound && distanceLastLocation > 2){
 		this->whiteBalls = tempWhiteBalls;
 		whiteBallFound = true;
 	} else {

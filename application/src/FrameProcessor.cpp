@@ -97,7 +97,7 @@ void FrameProcessor::findCountours (Mat frame){
 	//cout << "mc size: " << mc.size() << endl;
     for (size_t i = 0; i < mc.size(); i++) {
     	contourArea = mu[i].m00;
-    	if(contourArea > 400 && contourArea < 1200 ){
+    	if(contourArea > 400 && contourArea < 1400 ){
 			Point2f c = mc[i];
 			circle(frame, c, 16, Scalar(0,0,255), 2, CV_AA);
 			circle(frame, c, 2, Scalar(0,255,0), 1, CV_AA);

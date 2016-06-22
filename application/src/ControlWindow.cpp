@@ -42,7 +42,7 @@ void ControlWindow::initControlWindow(){
     dilateSize = 10;
 
     //initialize inRange threshold trackbars
-    minHue = 47;
+    minHue = 40;
     maxHue = 107;
     minSaturation = 58	;
     maxSaturation = 153;
